@@ -1,3 +1,6 @@
+/* Drop down menu that provides links to account management functions
+ with icon indicating login status. */
+
 import { Component } from 'react';
 import './AccountMenu.css';
 import Shared from './Shared.js';
@@ -31,18 +34,22 @@ class AccountMenu extends Component{
             if(this.state.menuVisible){
                 dropdownClass += " show"
             }
-            return <div>
-                <button>{this.props.username}</button>
-                <div onClick={this.toggleMenu} className={dropdownClass}>
-                    <a onClick={this.handleLogout}>Log Out</a>
-                    <a onClick={this.handleManage}>Manage Account</a>
+            return (
+                <div>
+                    <button onClick={this.toggleMenu}>{this.props.username}</button>
+                    <div className={dropdownClass}>
+                        <a onClick={this.handleLogout}>Log Out</a>
+                        <a onClick={this.handleManage}>Manage Account</a>
+                    </div>
                 </div>
-            </div>
+            )
         }
         else{
-            return <div>
-                <button onClick={this.handleLogin}>Log In</button>
-            </div>
+            return(
+                <div>
+                    <button onClick={this.handleLogin}>Log In</button>
+                </div>
+            )
         }
     }
 }
