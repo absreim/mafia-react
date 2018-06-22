@@ -6,6 +6,7 @@ Required props:
 */
 
 import {Component} from "react"
+import "./AccountDelete.css"
 
 class AccountDelete extends Component{
     constructor(props){
