@@ -7,7 +7,7 @@ for submitting the credentials
 interface instead
 */
 
-import {Component} from "react"
+import React, {Component} from "react"
 
 class AccountCreation extends Component {
     constructor(props){
@@ -56,3 +56,5 @@ class AccountCreation extends Component {
         )
     }
 }
+
+export default AccountCreation

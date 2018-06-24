@@ -1,7 +1,7 @@
 /* Drop down menu that provides links to account management functions
  with icon indicating login status. */
 
-import { Component } from 'react';
+import React, {Component} from 'react';
 import './AccountMenu.css';
 import Shared from './Shared.js';
 

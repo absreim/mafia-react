@@ -5,7 +5,7 @@ Required props:
 - username - username of the currently logged in user
 */
 
-import {Component} from "react"
+import React, {Component} from "react"
 import "./AccountDelete.css"
 
 class AccountDelete extends Component{
@@ -35,3 +35,5 @@ class AccountDelete extends Component{
         )
     }
 }
+
+export default AccountDelete

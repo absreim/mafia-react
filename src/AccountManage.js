@@ -9,7 +9,7 @@ to change password interface
 delete account interface
 */
 
-import {Component} from "react"
+import React, {Component} from "react"
 import "./AccountManage.css"
 
 class AccountManage extends Component{
@@ -35,3 +35,5 @@ class AccountManage extends Component{
         )
     }
 }
+
+export default AccountManage

@@ -7,7 +7,7 @@ submitting log in crendentials
 creation interface
 */
 
-import {Component} from "react"
+import React, {Component} from "react"
 
 class AccountLogin extends Component{
     constructor(props){
@@ -46,3 +46,5 @@ class AccountLogin extends Component{
         )
     }
 }
+
+export default AccountLogin
