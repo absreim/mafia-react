@@ -1,9 +1,19 @@
-/* Drop down menu that provides links to account management functions
- with icon indicating login status. */
+/*
+Drop down menu that provides links to account management functions
+with icon indicating login status.
+Required props:
+- username - name of logged in user, or null if not logged in
+- loginStatus - Shared.LoginState.LOGGEDIN if logged in, otherwise
+not logged in
+- handleLogin - handler function for when user clicks the Log In link
+- handleLogout - handler function for when the user clicks the Log Out link
+- handleManage - handler function for when the user clicks the Manage
+Account link
+*/
 
-import React, {Component} from 'react';
-import './AccountMenu.css';
-import Shared from './Shared.js';
+import React, {Component} from "react"
+import "./AccountMenu.css"
+import Shared from "./Shared.js"
 
 class AccountMenu extends Component{
     constructor(props){
