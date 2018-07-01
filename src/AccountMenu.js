@@ -34,12 +34,12 @@ class AccountMenu extends Component{
         this.props.handleManage()
     }
     toggleMenu(){
-        this.setState((prevState) => {
+        this.setState((prevState) => ({
             menuVisible: !prevState.menuVisible
-        })
+        }))
     }
     render(){
-        if(props.loginStatus == Shared.LoginStatus.LOGGEDIN && props.username){
+        if(this.props.loginStatus === Shared.LoginStatus.LOGGEDIN && this.props.username){
             var dropdownClass = "dropdown-content"
             if(this.state.menuVisible){
                 dropdownClass += " show"

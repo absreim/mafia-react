@@ -14,6 +14,7 @@ import MainMenu from "./MainMenu.js"
 import Welcome from "./Welcome.js"
 import AccountMenu from "./AccountMenu.js"
 import GameContent from "./GameContent.js"
+import MessageBar from "./MessageBar.js"
 import Shared from "./Shared.js"
 
 
@@ -38,7 +39,7 @@ class App extends Component {
     this.changePassword = this.changePassword.bind(this)
   }
   componentDidMount(){
-    updateLoginStatus()
+    this.updateLoginStatus()
   }
   // clear the user visible messages
   // generally called when submits a form or navigates to new page
@@ -63,18 +64,21 @@ class App extends Component {
             else{
               console.log("Warning: server responds that user is logged in, but did not specify a user name")
             }
+            break
           case Shared.LoginStatus.LOGGEDOUT:
             this.setState({
               username: null,
               loginStatus: Shared.LoginStatus.LOGGEDOUT,
               currentContent: ContentEnum.Welcome
             })
+            break
           case Shared.LoginStatus.ERROR:
             this.setState({
               username: null,
               loginStatus: Shared.LoginStatus.ERROR
             })
             console.log("User session is corrupt, logging out and back in may fix the problem.")
+            break
           default:
             console.log("Unrecognized loginStatus value returned from server.")
         }
@@ -100,16 +104,19 @@ class App extends Component {
         switch(response.data.outcome){
           case Shared.AccountCreateOutcome.INTERNALERROR:
             this.displayMessage("Internal server error creating account. Please try again later.")
+            break
           case Shared.AccountCreateOutcome.EXISTS:
             this.displayMessage("An account by that name already exists.")
+            break
           case Shared.AccountCreateOutcome.MISSINGINFO:
             this.displayMessage("Error creating account due to API mismatch between client and server. Please report this error and try again later.")
             console.log("Error: server reports that in the request to create an account, username and password information is missing from the body.")
+            break
           case Shared.AccountCreateOutcome.SUCCESS:
-            if(this.state.loginStatus == Shared.LoginStatus.LOGGEDIN){
+            if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN){
               this.displayMessage("Account successfully created! To log in with your new account, log out first.")
             }
-            else if(this.state.loginStatus == Shared.LoginStatus.LOGGEDOUT){
+            else if(this.state.loginStatus === Shared.LoginStatus.LOGGEDOUT){
               this.setState({
                 currentContent: ContentEnum.AccountLogin,
                 userMessage: "Account successfully created!"
@@ -118,6 +125,7 @@ class App extends Component {
             else{
               this.displayMessage("Account successfully created, but your user session appears to be corrupt. Please log out or refresh the page before attempting to log in with your new account.")
             }
+            break
           default:
             this.displayMessage("Unrecognized response from server. Please report this error and try again later.")
             console.log("Unrecognized create account outcome: " + response.data.outcome)
@@ -135,7 +143,7 @@ class App extends Component {
   createAccountWithConfirm(username, password, confirm){
     this.clearMessage()
     if(password === confirm){
-      createAccount(username, password)
+      this.createAccount(username, password)
     }
     else{
       this.displayMessage("Passwords do not match.")
@@ -143,7 +151,7 @@ class App extends Component {
   }
   deleteAccount(password){
     this.clearMessage()
-    if(this.state.loginStatus == Shared.LoginStatus.LOGGEDIN && this.state.username){
+    if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN && this.state.username){
       axios({
         method: "post",
         url: "http://localhost:3001/deleteAccount",
@@ -155,12 +163,16 @@ class App extends Component {
           switch(response.data.outcome){
             case Shared.AccountDeleteOutcome.NOTLOGGEDIN:
               this.displayMessage("The server thinks you are not logged in. Try logging out, logging back in, and deleting your account again.")
+              break
             case Shared.AccountDeleteOutcome.INTERNALERROR:
               this.displayMessage("Internal server error trying to delete account. Please try again later.")
+              break
             case Shared.AccountDeleteOutcome.MISSINGINFO:
               this.displayMessage("Protocol mismatch between client and server. Please report this problem and try again later.")
+              break
             case Shared.AccountDeleteOutcome.WRONGPASSWORD:
               this.displayMessage("This password you entered was incorrect.")
+              break
             case Shared.AccountDeleteOutcome.SUCCESS:
               this.setState({
                 username: null,
@@ -168,6 +180,7 @@ class App extends Component {
                 currentContent: ContentEnum.Welcome,
                 userMessage: ""
               })
+              break
             default:
               this.displayMessage("Incomplete response from server. Please report this problem and try again later.")
           }
@@ -194,22 +207,27 @@ class App extends Component {
         password: password
       }
     }).then((function(response){
-      if(reponse.data){
+      if(response.data){
         switch(response.data.outcome){
           case Shared.LoginOutcome.LOGGEDIN:
             this.displayMessage("The server thinks you are already logged in. Try refreshing the page to see if your login status is corrected.")
+            break
           case Shared.LoginOutcome.INTERNALERROR:
             this.displayMessage("Internal server error when trying to log in. Please try again later.")
+            break
           case Shared.LoginOutcome.MISSINGINFO:
             this.displayMessage("Protocol mismatch between client and server. If problem persists, please report the problem and try again later.")
+            break
           case Shared.LoginOutcome.WRONGCREDENTIALS:
             this.displayMessage("Invalid username and/or password.")
+            break
           case Shared.LoginOutcome.SUCCESS:
             this.setState({
               username: username,
               loginStatus: Shared.LoginStatus.LOGGEDIN,
               currentContent: ContentEnum.MainMenu
             })
+            break
           default:
             this.displayMessage("Incomplete response from server. Please report this problem and try again later.")
         }
@@ -223,7 +241,7 @@ class App extends Component {
     this.clearMessage()
     // If internal login state is in ERROR state, try to logout from the server
     // to try to clear up corrupted session.
-    if(this.state.loginStatus == Shared.LoginStatus.LOGGEDIN || this.state.loginStatus == this.LoginStatus.ERROR){
+    if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN || this.state.loginStatus === this.LoginStatus.ERROR){
       axios.get("http://localhost:3001/logout").then((function(response){
         if(response.data){
           switch(response.data.outcome){
@@ -234,8 +252,10 @@ class App extends Component {
                 currentContent: ContentEnum.Welcome,
                 userMessage: "Successfully logged out."
               })
+              break
             case Shared.LogoutOutcome.INTERNALERROR:
               this.displayMessage("Internal server error when trying to log out. Please try again later.")
+              break
             case Shared.LogoutOutcome.NOTLOGGEDIN:
               this.setState({
                 username: null,
@@ -244,6 +264,7 @@ class App extends Component {
                 userMessage: "Server indicates that you were already logged out."
               })
               console.log("Warning: client made attempt to log out, but server reports account is already logged out.")
+              break
             default:
               this.displayMessage("Unrecognized response from server when attempting to log out. Please report this problem and try again later.")
               console.log("Unrecognized log out outcome received: " + response.data.outcome)
@@ -257,7 +278,7 @@ class App extends Component {
       console.log("Error communicating with server when trying to log out: " + error)
       }).bind(this))
     }
-    else if(this.state.loginStatus == Shared.LoginStatus.LOGGEDOUT){
+    else if(this.state.loginStatus === Shared.LoginStatus.LOGGEDOUT){
       this.displayMessage("You are already logged out.")
       console.log("Warning: attempt to log out on client end when state already indicates the account is logged out.")
     }
@@ -267,7 +288,7 @@ class App extends Component {
   }
   changePassword(oldPassword, newPassword){
     this.clearMessage()
-    if(this.state.loginStatus == Shared.LoginStatus.LOGGEDIN && this.state.username){
+    if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN && this.state.username){
       axios({
         method: "post",
         url: "http://localhost:3001/changePassword",
@@ -280,14 +301,19 @@ class App extends Component {
           switch(response.data.outcome){
             case Shared.ChangePasswordOutcome.NOTLOGGEDIN:
               this.displayMessage("The server thinks you are not logged in. Try logging out and logging back in.")
+              break
             case Shared.ChangePasswordOutcome.INTERNALERROR:
               this.displayMessage("Internal server error trying to change password. Please try again later.")
+              break
             case Shared.ChangePasswordOutcome.MISSINGINFO:
               this.displayMessage("Protocol mismatch between client and server. Please report this problem and try again later.")
+              break
             case Shared.ChangePasswordOutcome.WRONGPASSWORD:
               this.displayMessage("This password you entered was incorrect.")
+              break
             case Shared.ChangePasswordOutcome.SUCCESS:
               this.displayMessage("Password changed successfully.")
+              break
             default:
               this.displayMessage("Incomplete response from server. Please report this problem and try again later.")
           }
@@ -309,14 +335,14 @@ class App extends Component {
 
   navigateLogin(){
     this.clearMessage()
-    if(this.state.loginStatus == Shared.LoginStatus.LOGGEDIN){
+    if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN){
       this.displayMessage("Already logged in. To log in as a different user, log out first.")
       console.log("Warning: attempt to navigate to log in component when a user is already logged in.")
     }
-    else if(this.state.loginStatus == Shared.LoginStatus.LOGGEDOUT){
+    else if(this.state.loginStatus === Shared.LoginStatus.LOGGEDOUT){
       this.setState({currentContent: ContentEnum.AccountLogin})
     }
-    else if(this.state.loginStatus == Shared.LoginStatus.ERROR){
+    else if(this.state.loginStatus === Shared.LoginStatus.ERROR){
       this.displayMessage("User session is corrupt. Logging out and back in may fix the problem.")
       console.log("Tried to navigate to login page but user session is corrupt. Logging out first may fix the problem.")
     }
@@ -327,13 +353,13 @@ class App extends Component {
   }
   navigateManage(){
     this.clearMessage()
-    if(this.state.loginStatus == Shared.LoginStatus.LOGGEDIN){
+    if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN){
       this.setState({currentContent: ContentEnum.AccountManage})
     }
-    else if(this.state.loginStatus == Shared.LoginStatus.LOGGEDOUT){
+    else if(this.state.loginStatus === Shared.LoginStatus.LOGGEDOUT){
       this.displayMessage("You are not logged in. Please log in first to manage an account.")
     }
-    else if(this.state.loginStatus == Shared.LoginStatus.ERROR){
+    else if(this.state.loginStatus === Shared.LoginStatus.ERROR){
       this.displayMessage("User session is corrupt. Logging out and back in may fix the problem.")
       console.log("Tried to navigate to account management page but user session is corrupt. Logging out first may fix the problem.")
     }
@@ -344,13 +370,13 @@ class App extends Component {
   }
   navigateCreate(){
     this.clearMessage()
-    if(this.state.loginStatus == Shared.LoginStatus.LOGGEDIN){
+    if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN){
       this.displayMessage("You are logged in. Please log out first.")
     }
-    else if(this.state.loginStatus == Shared.LoginStatus.ERROR){
+    else if(this.state.loginStatus === Shared.LoginStatus.ERROR){
       this.displayMessage("User session is corrupt. Please log out first and try again.")
     }
-    else if(this.state.loginStatus == Shared.LoginStatus.LOGGEDOUT){
+    else if(this.state.loginStatus === Shared.LoginStatus.LOGGEDOUT){
       this.setState({currentContent: ContentEnum.AccountCreation})
     }
     else{
@@ -359,13 +385,13 @@ class App extends Component {
   }
   navigateChangePassword(){
     this.clearMessage()
-    if(this.state.loginStatus == Shared.LoginStatus.LOGGEDIN){
+    if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN){
       this.setState({currentContent: ContentEnum.ChangePassword})
     }
-    else if(this.state.loginStatus == Shared.LoginStatus.LOGGEDOUT){
+    else if(this.state.loginStatus === Shared.LoginStatus.LOGGEDOUT){
       this.displayMessage("You must be logged in to change the password for an account.")
     }
-    else if(this.state.loginStatus == Shared.LoginStatus.ERROR){
+    else if(this.state.loginStatus === Shared.LoginStatus.ERROR){
       this.displayMessage("User session is corrupt. Please log out and log in again.")
     }
     else{
@@ -374,13 +400,13 @@ class App extends Component {
   }
   navigateDelete(){
     this.clearMessage()
-    if(this.state.loginStatus == Shared.LoginStatus.LOGGEDIN){
+    if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN){
       this.setState({currentContent: ContentEnum.AccountDelete})
     }
-    else if(this.state.loginStatus == Shared.LoginStatus.LOGGEDOUT){
+    else if(this.state.loginStatus === Shared.LoginStatus.LOGGEDOUT){
       this.displayMessage("You must be logged in to delete an account.")
     }
-    else if(this.state.loginStatus == Shared.LoginStatus.ERROR){
+    else if(this.state.loginStatus === Shared.LoginStatus.ERROR){
       this.displayMessage("User session is corrupt. Please log out and log in again.")
     }
     else{
@@ -389,13 +415,13 @@ class App extends Component {
   }
   navigateMainMenu(){
     this.clearMessage()
-    if(this.state.loginStatus == Shared.LoginStatus.LOGGEDIN){
+    if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN){
       this.setState({currentContent: ContentEnum.MainMenu})
     }
-    else if(this.state.loginStatus == Shared.LoginStatus.LOGGEDOUT){
+    else if(this.state.loginStatus === Shared.LoginStatus.LOGGEDOUT){
       this.displayMessage("You are not logged in. Please log in first to manage an account.")
     }
-    else if(this.state.loginStatus == Shared.LoginStatus.ERROR){
+    else if(this.state.loginStatus === Shared.LoginStatus.ERROR){
       this.displayMessage("User session is corrupt. Logging out and back in may fix the problem.")
       console.log("Tried to navigate to account management page but user session is corrupt. Logging out first may fix the problem.")
     }
@@ -424,29 +450,33 @@ class App extends Component {
         return <Welcome handleLogin={this.navigateLogin} handleCreate={this.navigateCreate} />
       case ContentEnum.GameContent:
         return <GameContent handleMainMenu={this.navigateMainMenu} />
+      default:
+        return <h2>An internal error has occurred. Please report this issue and try again later.</h2>
     }
   }
   render() {
     return (
       <table>
-        <tr>
-          <td>
-            <AccountMenu username={this.state.username} loginStatus={this.state.loginStatus} handleLogin={this.navigateLogin} handleLogout={this.logout} handleManage={this.navgiateManage} />
-          </td>
-          <td><h1>Absreim's Mafia React Client</h1></td>
-        </tr>
-        <tr>
-          <MessageBar message={this.state.userMessage} />
-        </tr>
-        <tr>
-          <td>{getContent()}</td>
-        </tr>
+        <tbody>
+          <tr>
+            <td>
+              <AccountMenu username={this.state.username} loginStatus={this.state.loginStatus} handleLogin={this.navigateLogin} handleLogout={this.logout} handleManage={this.navgiateManage} />
+            </td>
+            <td><h1>Absreim's Mafia React Client</h1></td>
+          </tr>
+          <tr>
+            <MessageBar message={this.state.userMessage} />
+          </tr>
+          <tr>
+            <td>{this.getContent()}</td>
+          </tr>
+        </tbody>
       </table>
     )
   }
 }
 
-ContentEnum = {
+const ContentEnum = {
   AccountCreation: "AccountCreation",
   AccountDelete: "AccountDelete",
   AccountLogin: "AccountLogin",

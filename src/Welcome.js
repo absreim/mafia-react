@@ -22,15 +22,17 @@ class Welcome extends Component{
     render(){
         return(
             <table>
-                <tr>
-                    <td><h2>Welcome to Absreim's Mafia</h2></td>
-                </tr>
-                <tr>
-                    <td><button onClick={this.handleLogin}>Log in</button></td>
-                </tr>
-                <tr>
-                    <td><button onClick={this.handleCreate}>Create Account</button></td>
-                </tr>
+                <tbody>
+                    <tr>
+                        <td><h2>Welcome to Absreim's Mafia</h2></td>
+                    </tr>
+                    <tr>
+                        <td><button onClick={this.handleLogin}>Log in</button></td>
+                    </tr>
+                    <tr>
+                        <td><button onClick={this.handleCreate}>Create Account</button></td>
+                    </tr>
+                </tbody>
             </table>
         )
     }

@@ -27,18 +27,20 @@ class MainMenu extends Component{
     render(){
         return(
             <table>
-                <tr>
-                    <td><h2>Welcome <span className="external-info">{this.props.username}</span>!</h2></td>
-                </tr>
-                <tr>
-                    <td><button onClick={this.handleEnterGame}>Enter Game</button></td>
-                </tr>
-                <tr>
-                    <td><button onClick={this.handleManage}>Manage Account</button></td>
-                </tr>
-                <tr>
-                    <td><button onClick={this.handleLogout}>Log Out</button></td>
-                </tr>
+                <tbody>
+                    <tr>
+                        <td><h2>Welcome <span className="external-info">{this.props.username}</span>!</h2></td>
+                    </tr>
+                    <tr>
+                        <td><button onClick={this.handleEnterGame}>Enter Game</button></td>
+                    </tr>
+                    <tr>
+                        <td><button onClick={this.handleManage}>Manage Account</button></td>
+                    </tr>
+                    <tr>
+                        <td><button onClick={this.handleLogout}>Log Out</button></td>
+                    </tr>
+                </tbody>
             </table>
         )
     }
