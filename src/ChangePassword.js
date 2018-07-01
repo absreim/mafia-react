@@ -1,7 +1,7 @@
 /*
 Password change interface for existing accounts.
 Required props:
-submitPasswords(oldPassword, new Password) - submits old and
+submitPasswords(old, new) - submits old and
 new passwords to attempt a change
 username - the name of the account for which a password change
 is being made

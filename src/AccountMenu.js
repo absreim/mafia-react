@@ -39,7 +39,7 @@ class AccountMenu extends Component{
         })
     }
     render(){
-        if(props.loginStatus == Shared.LoginState.LOGGEDIN && props.username){
+        if(props.loginStatus == Shared.LoginStatus.LOGGEDIN && props.username){
             var dropdownClass = "dropdown-content"
             if(this.state.menuVisible){
                 dropdownClass += " show"

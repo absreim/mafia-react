@@ -1,5 +1,9 @@
 /*
 Main menu content page for logged in users.
+Required props:
+-handleEnterGame() - function to navigate to game content
+-handleManage() - function to navigate to account management
+-handleLogout() - function logout
 */
 
 import React, {Component} from "react"
