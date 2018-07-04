@@ -18,7 +18,7 @@ class AccountManage extends Component{
         this.handleChangePassword = this.handleChangePassword.bind(this)
         this.handleDelete = this.handleDelete.bind(this)
     }
-    handleChangePwd(event){
+    handleChangePassword(event){
         this.props.changePasswordRedirect()
     }
     handleDelete(event){

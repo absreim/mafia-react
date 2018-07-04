@@ -27,12 +27,15 @@ class App extends Component {
       currentContent: null,
       userMessage: "" // important message visible to user
     }
+    axios.defaults.withCredentials = true
     this.createAccountWithConfirm = this.createAccountWithConfirm.bind(this)
     this.navigateLogin = this.navigateLogin.bind(this)
     this.navigateManage = this.navigateManage.bind(this)
     this.navigateDelete = this.navigateDelete.bind(this)
     this.navigateCreate = this.navigateCreate.bind(this)
     this.navigateChangePassword = this.navigateChangePassword.bind(this)
+    this.navigateMainMenu = this.navigateMainMenu.bind(this)
+    this.navigateGameContent = this.navigateGameContent.bind(this)
     this.logout = this.logout.bind(this)
     this.deleteAccount = this.deleteAccount.bind(this)
     this.login = this.login.bind(this)
@@ -50,7 +53,11 @@ class App extends Component {
     this.setState({userMessage: message})
   }
   updateLoginStatus(){
-    axios.get("http://localhost:3001/loginstatus").then((function(response){
+    axios({
+      method: "get",
+      url: "http://brookli.name:3001/loginstatus",
+      withCredentials: true
+    }).then((function(response){
       if(response.data.loginStatus){
         switch(response.data.loginStatus){
           case Shared.LoginStatus.LOGGEDIN:
@@ -94,11 +101,12 @@ class App extends Component {
   createAccount(username, password){
     axios({
       method: "post",
-      url: "http://localhost:3001/signup",
+      url: "http://brookli.name:3001/signup",
       data: {
         username: username,
         password: password
-      }
+      },
+      withCredentials: true
     }).then((function(response){
       if(response.data){
         switch(response.data.outcome){
@@ -154,10 +162,11 @@ class App extends Component {
     if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN && this.state.username){
       axios({
         method: "post",
-        url: "http://localhost:3001/deleteAccount",
+        url: "http://brookli.name:3001/deleteAccount",
         data: {
           password: password
-        }
+        },
+        withCredentials: true
       }).then((function(response){
         if(response.data){
           switch(response.data.outcome){
@@ -201,11 +210,12 @@ class App extends Component {
     this.clearMessage()
     axios({
       method: "post",
-      url: "http://localhost:3001/login",
+      url: "http://brookli.name:3001/login",
       data: {
         username: username,
         password: password
-      }
+      },
+      withCredentials: true
     }).then((function(response){
       if(response.data){
         switch(response.data.outcome){
@@ -242,7 +252,11 @@ class App extends Component {
     // If internal login state is in ERROR state, try to logout from the server
     // to try to clear up corrupted session.
     if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN || this.state.loginStatus === this.LoginStatus.ERROR){
-      axios.get("http://localhost:3001/logout").then((function(response){
+      axios({
+        method: "get",
+        url: "http://brookli.name:3001/logout",
+        withCredentials: true
+      }).then((function(response){
         if(response.data){
           switch(response.data.outcome){
             case Shared.LogoutOutcome.SUCCESS:
@@ -291,11 +305,12 @@ class App extends Component {
     if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN && this.state.username){
       axios({
         method: "post",
-        url: "http://localhost:3001/changePassword",
+        url: "http://brookli.name:3001/changePassword",
         data: {
           oldPassword: oldPassword,
           newPassword: newPassword
-        }
+        },
+        withCredentials: true
       }).then((function(response){
         if(response.data){
           switch(response.data.outcome){
@@ -419,15 +434,32 @@ class App extends Component {
       this.setState({currentContent: ContentEnum.MainMenu})
     }
     else if(this.state.loginStatus === Shared.LoginStatus.LOGGEDOUT){
-      this.displayMessage("You are not logged in. Please log in first to manage an account.")
+      this.displayMessage("You are not logged in. Please log in first.")
     }
     else if(this.state.loginStatus === Shared.LoginStatus.ERROR){
       this.displayMessage("User session is corrupt. Logging out and back in may fix the problem.")
-      console.log("Tried to navigate to account management page but user session is corrupt. Logging out first may fix the problem.")
+      console.log("Tried to navigate to main menu but user session is corrupt. Logging out first may fix the problem.")
     }
     else{
       this.displayMessage("User session was not properly initialized. Reloading the page may fix the problem.")
-      console.log("Tried to navigate to account management but login status not properly initialized. One cause may be that the backend server was unreachable. Reloading the page may fix the problem.")
+      console.log("Tried to navigate to main menu but login status not properly initialized. One cause may be that the backend server was unreachable. Reloading the page may fix the problem.")
+    }
+  }
+  navigateGameContent(){
+    this.clearMessage()
+    if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN){
+      this.setState({currentContent: ContentEnum.GameContent})
+    }
+    else if(this.state.loginStatus === Shared.LoginStatus.LOGGEDOUT){
+      this.displayMessage("You are not logged in. Please log in first.")
+    }
+    else if(this.state.loginStatus === Shared.LoginStatus.ERROR){
+      this.displayMessage("User session is corrupt. Logging out and back in may fix the problem.")
+      console.log("Tried to navigate to game content but user session is corrupt. Logging out first may fix the problem.")
+    }
+    else{
+      this.displayMessage("User session was not properly initialized. Reloading the page may fix the problem.")
+      console.log("Tried to navigate to game content but login status not properly initialized. One cause may be that the backend server was unreachable. Reloading the page may fix the problem.")
     }
   }
 
@@ -460,12 +492,14 @@ class App extends Component {
         <tbody>
           <tr>
             <td>
-              <AccountMenu username={this.state.username} loginStatus={this.state.loginStatus} handleLogin={this.navigateLogin} handleLogout={this.logout} handleManage={this.navgiateManage} />
+              <AccountMenu username={this.state.username} loginStatus={this.state.loginStatus} handleLogin={this.navigateLogin} handleLogout={this.logout} handleManage={this.navigateManage} />
             </td>
             <td><h1>Absreim's Mafia React Client</h1></td>
           </tr>
           <tr>
-            <MessageBar message={this.state.userMessage} />
+            <td>
+              <MessageBar message={this.state.userMessage} />
+            </td>
           </tr>
           <tr>
             <td>{this.getContent()}</td>

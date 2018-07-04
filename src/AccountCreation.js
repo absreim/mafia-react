@@ -18,10 +18,10 @@ class AccountCreation extends Component {
             confirm: ""
         }
         this.handleUsernameChange = this.handleUsernameChange.bind(this)
-        this.handlePasswordChange = this.handleUsernameChange.bind(this)
+        this.handlePasswordChange = this.handlePasswordChange.bind(this)
         this.handleConfirmChange = this.handleConfirmChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.handleLoginLink = this.handleLoginRedirect.bind(this)
+        this.handleLoginLink = this.handleLoginLink.bind(this)
     }
     handleUsernameChange(event){
         this.setState({username: event.target.value})
@@ -34,7 +34,7 @@ class AccountCreation extends Component {
     }
     handleSubmit(event){
         // defer credential validation to component above
-        this.props.submitCrendentials(this.state.username, this.state.password, this.state.confirm)
+        this.props.submitCredentials(this.state.username, this.state.password, this.state.confirm)
         event.preventDefault()
     }
     handleLoginLink(event){
@@ -44,12 +44,12 @@ class AccountCreation extends Component {
         return(
             <form onSubmit={this.handleSubmit}>
                 <h2>Create a new account</h2>
-                <label for="username">Username:</label>
+                <label htmlFor="username">Username:</label>
                 <input type="text" id="username" value={this.state.username} onChange={this.handleUsernameChange} />
-                <label for="password">Password</label>
-                <input type="text" id="password" value={this.state.password} onChange={this.handlePasswordChange} />
-                <label for="confirm">Confirm Password</label>
-                <input type="text" id="confirm" value={this.state.confirm} onChange={this.handleConfirmChange} />
+                <label htmlFor="password">Password</label>
+                <input type="password" id="password" value={this.state.password} onChange={this.handlePasswordChange} />
+                <label htmlFor="confirm">Confirm Password</label>
+                <input type="password" id="confirm" value={this.state.confirm} onChange={this.handleConfirmChange} />
                 <input type="submit" value="Submit" />
                 <p>Already have an account? You may <a onClick={this.handleLoginLink}>log in</a> to it instead.</p>
             </form>

@@ -36,10 +36,10 @@ class AccountLogin extends Component{
         return(
             <form onSubmit={this.handleSubmit}>
                 <h2>Enter your credentials to log in</h2>
-                <label for="username">Username:</label>
+                <label htmlFor="username">Username:</label>
                 <input type="text" id="username" value={this.state.username} onChange={this.handleUsernameChange} />
-                <label for="password">Password:</label>
-                <input type="text" id="password" value={this.state.password} onChange={this.handlePasswordChange} />
+                <label htmlFor="password">Password:</label>
+                <input type="password" id="password" value={this.state.password} onChange={this.handlePasswordChange} />
                 <input type="submit" value="Submit" />
                 <h3>Don't have an account? <a onClick={this.handleCreateLink}>Create one.</a></h3>
             </form>
