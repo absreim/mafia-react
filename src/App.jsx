@@ -5,17 +5,17 @@ Root component for Mafia app.
 import React, { Component } from 'react'
 import axios from "axios"
 import './App.css'
-import AccountCreation from "./AccountCreation.js"
-import AccountDelete from "./AccountDelete.js"
-import AccountLogin from "./AccountLogin.js"
-import AccountManage from "./AccountManage.js"
-import ChangePassword from "./ChangePassword.js"
-import MainMenu from "./MainMenu.js"
-import Welcome from "./Welcome.js"
-import AccountMenu from "./AccountMenu.js"
-import GameContent from "./GameContent.js"
-import MessageBar from "./MessageBar.js"
-import Shared from "./Shared.js"
+import AccountCreation from "./AccountCreation"
+import AccountDelete from "./AccountDelete"
+import AccountLogin from "./AccountLogin"
+import AccountManage from "./AccountManage"
+import ChangePassword from "./ChangePassword"
+import MainMenu from "./MainMenu"
+import Welcome from "./Welcome"
+import AccountMenu from "./AccountMenu"
+import GameContent from "./GameContent"
+import MessageBar from "./MessageBar"
+import Shared from "./Shared"
 
 
 class App extends Component {
@@ -55,7 +55,7 @@ class App extends Component {
   updateLoginStatus(){
     axios({
       method: "get",
-      url: "http://brookli.name:3001/loginstatus",
+      url: "http://localhost:3001/loginstatus",
       withCredentials: true
     }).then((function(response){
       if(response.data.loginStatus){
@@ -101,7 +101,7 @@ class App extends Component {
   createAccount(username, password){
     axios({
       method: "post",
-      url: "http://brookli.name:3001/signup",
+      url: "http://localhost:3001/signup",
       data: {
         username: username,
         password: password
@@ -162,7 +162,7 @@ class App extends Component {
     if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN && this.state.username){
       axios({
         method: "post",
-        url: "http://brookli.name:3001/deleteAccount",
+        url: "http://localhost:3001/deleteAccount",
         data: {
           password: password
         },
@@ -210,7 +210,7 @@ class App extends Component {
     this.clearMessage()
     axios({
       method: "post",
-      url: "http://brookli.name:3001/login",
+      url: "http://localhost:3001/login",
       data: {
         username: username,
         password: password
@@ -254,7 +254,7 @@ class App extends Component {
     if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN || this.state.loginStatus === this.LoginStatus.ERROR){
       axios({
         method: "get",
-        url: "http://brookli.name:3001/logout",
+        url: "http://localhost:3001/logout",
         withCredentials: true
       }).then((function(response){
         if(response.data){
@@ -305,7 +305,7 @@ class App extends Component {
     if(this.state.loginStatus === Shared.LoginStatus.LOGGEDIN && this.state.username){
       axios({
         method: "post",
-        url: "http://brookli.name:3001/changePassword",
+        url: "http://localhost:3001/changePassword",
         data: {
           oldPassword: oldPassword,
           newPassword: newPassword
