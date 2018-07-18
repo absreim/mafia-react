@@ -1,5 +1,5 @@
 /* Shared constants and classes between client and server. 
-This file is not intended to be used as is on the server side. 
+This file is not intended to be used as is on the client side. 
 Organizing the module this way is merely meant to make the 
 structure of the app easier to understand. */
 
@@ -37,6 +37,8 @@ Shared.Phases = {
 }
 
 Shared.ClientMessageType = {
+    CHATMESSAGE: "chatMessage",
+    PRIVILEGEDCHATMESSAGE: "privilegedChatMessage",
     GAMESTATEREQ: "gameStateReq",
     SUGGESTTARGET: "suggestTarget",
     VOTECAST: "voteCast",
@@ -44,6 +46,8 @@ Shared.ClientMessageType = {
 }
 
 Shared.ServerMessageType = {
+    CHATMESSAGE: "chatMessage",
+    PRIVILEGEDCHATMESSAGE: "privilegedChatMessage",
     GAMESTATEINFO: "gameStateInfo",
     ACKNOWLEDGEMENT: "acknoledgement",
     VOTECAST: "voteCast",
@@ -112,6 +116,63 @@ Shared.ChangePasswordOutcome = {
     MISSINGINFO: "missingInfo",
     WRONGPASSWORD: "wrongPassword",
     SUCCESS: "success"
+}
+
+Shared.ServerSocketEvent = {
+    SYSTEMNOTICE: "systemNotice", // notices from server unrelated to the happneings inside the game
+    GAMEACTION: "gameAction", // action related to the context of the game itself
+    LOBBYUPDATE: "lobbyUpdate", // update to the status of the game lobby (e.g. a player joins/leaves a game)
+    LOBBYSTATE: "lobbyState", // message containing complete state of lobby
+    LOBBYUPDATESSUBSCRIBED: "lobbyUpdatesSubscribed", // confirmation that lobby updates room has been joined
+    LOBBYUPDATESUNSUBSCRIBED: "lobbyUpdatesUnsubscribed",
+    CREATEGAMEOUTCOME: "createGameOutcome", // outcome of a create game request, enumerated in CreateGameOutcome
+    LEAVEGAMEOUTCOME: "leaveGameOutcome",
+    JOINGAMEOUTCOME: "joinGameOutcome",
+    GAMEENDED: "gameEnded"
+    // clients are notified of the start to a game via GAMEACTION messages
+}
+
+Shared.ClientSocketEvent = {
+    GAMEACTION: "gameAction", // action related to the context of the game itself
+    STATUSREQUEST: "statusRequest", // request from client asking for the client's status (e.g. whether it is in a game)
+    LOBBYSTATEREQUEST: "lobbyStateRequest", // client message asking for complete state of lobby
+    SUBSCRIBELOBBYUPDATES: "subscribeLobbyUpdates", // request to join lobby updates room
+    UNSUBSCRIBELOBBYUPDATES: "unsubscribeLobbyUpdates",
+    JOINGAME: "joinGame",
+    CREATEGAME: "createGame",
+    LEAVEGAME: "leaveGame" // leave game in lobby, before it has started. Currenlty no way to leave started games.
+}
+
+Shared.CreateGameOutcome = {
+    MISSINGINFO: "missingInfo",
+    NAMEEXISTS: "nameExists",
+    NOTENOUGHPLAYERS: "notEnoughPlayers",
+    TOOMANYWEREWOLVES: "tooManyWerewolves",
+    INTERNALERROR: "internalError",
+    SUCCESS: "success"
+}
+
+Shared.LeaveGameOutcome = {
+    NOTINGAME: "notInGame",
+    GAMESTARTED: "gameStarted",
+    INTERNALERROR: "internalError",
+    SUCCESS: "success"
+}
+
+Shared.JoinGameOutcome = {
+    MISSINGINFO: "missingInfo",
+    ALREADYINGAME: "alreadyInGame",
+    GAMESTARTED: "gameStarted",
+    DOESNOTEXIST: "doesNotExist",
+    SUCCESS: "success",
+    INTERNALERROR: "internalError"
+}
+
+Shared.LobbyUpdate = {
+    GAMECREATED: "gameCreated",
+    PLAYERLEFT: "playerLeft",
+    PLAYERJOINED: "playerJoined",
+    GAMEDELETED: "gameDeleted"
 }
 
 export default Shared
