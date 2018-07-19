@@ -2,6 +2,7 @@
 
 import React, {Component} from "react"
 import io from "socket.io-client"
+import Shared from "./Shared"
 
 class GameContent extends Component{
     constructor(props){
@@ -14,10 +15,12 @@ class GameContent extends Component{
             socketGeneralError: null,
             awaitingStatus: false,
             gameState: null,
-            lobbyState: null
+            lobbyState: null,
+            gameName: null
         }
         this.handleMainMenu = this.handleMainMenu.bind(this)
         this.connectSocket = this.connectSocket.bind(this)
+        this.handleContinue = this.handleContinue.bind(this)
     }
     componentDidMount(){
         const socket = io("http://localhost:3001/socket.io",{
@@ -71,6 +74,38 @@ class GameContent extends Component{
             })
             console.log("Error encountered by the socket.io client: " + error)
         }).bind(this))
+        socket.on(Shared.ServerSocketEvent.STATUSREPLY, function(data){
+            if(this.state.awaitingStatus){
+                if(data.game){
+                    this.setState({
+                        awaitingStatus: false,
+                        gameName: data.game
+                    })
+                }
+                else{
+                    this.setState({
+                        awaitingStatus: false,
+                        gameName: null
+                    })
+                }
+            }
+            else{
+                console.log("Warning: unsolicited status update request reply messsage received from server.")
+            }
+        })
+        socket.on(Shared.ServerSocketEvent.LOBBYSTATE, function(data){
+            if(data){
+                this.setState({lobbyState: data})
+            }
+            else{
+                console.log("Warning: received no data in message about lobby state.")
+            }
+        })
+        socket.on(Shared.ServerSocketEvent.LOBBYUPDATESSUBSCRIBED, function(){
+            if(!this.state.lobbyState){
+                this.state.socket.emit(Shared.ClientSocketEvent.LOBBYSTATEREQUEST)
+            }
+        })
         this.setState({socket: socket})
     }
     componentWillUnmount(){
@@ -84,6 +119,14 @@ class GameContent extends Component{
     handleMainMenu(){
         this.props.handleMainMenu()
     }
+    handleContinue(){
+        if(this.state.gameName){ // user in game already, request copy of game state
+            this.state.socket.emit(Shared.ClientSocketEvent.GAMEACTION, Shared.ClientMessageType.GAMESTATEREQ)
+        }
+        else{ // no previous game, send user to lobby
+            this.state.socket.emit(Shared.ClientSocketEvent.SUBSCRIBELOBBYUPDATES)
+        }
+    }
     render(){
         if(this.state.socketConnected){
             if(this.state.awaitingStatus){
@@ -96,7 +139,34 @@ class GameContent extends Component{
                 )
             }
             else{
-                
+                if(this.state.gameState){
+
+                }
+                else{
+                    if(this.state.lobbyState){
+
+                    }
+                    else{
+                        if(this.state.gameName){ // splash screen to inform user that they were previously in a game and will be returned to that game
+                            return(
+                                <div>
+                                    <h2>Welcome back!</h2>
+                                    <h3>Our records show that you were previously in the game {this.state.gameName}</h3>
+                                    <button onClick={this.handleContinue}>Continue</button>
+                                </div>
+                            )
+                        }
+                        else{
+                            return(
+                                <div>
+                                    <h2>Entering Lobby</h2>
+                                    <h3>It looks like you are not part of an existing game. Click the button below to enter the lobby where you can create a new game or join an existing game.</h3>
+                                    <button onClick={this.handleContinue}>Continue</button>
+                                </div>
+                            )
+                        }
+                    }
+                }
             }
         }
         else{
