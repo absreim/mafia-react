@@ -7,6 +7,7 @@ Required props:
 */
 
 import React, {Component} from "react"
+import "./MainMenu.css"
 
 class MainMenu extends Component{
     constructor(props){

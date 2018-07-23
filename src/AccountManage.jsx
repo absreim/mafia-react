@@ -29,8 +29,8 @@ class AccountManage extends Component{
             <div>
                 <h2>Manage your account</h2>
                 <p>You are logged in as <span className="external-info">{this.props.username}</span></p>
-                <button onClick={this.handleChangePassword}>Change Password</button>
-                <button onClick={this.handleDelete}>Delete Account</button>
+                <button type="button" onClick={this.handleChangePassword}>Change Password</button>
+                <button type="button" onClick={this.handleDelete}>Delete Account</button>
             </div>
         )
     }

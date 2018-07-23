@@ -46,7 +46,7 @@ class AccountMenu extends Component{
             }
             return (
                 <div>
-                    <button onClick={this.toggleMenu}>{this.props.username}</button>
+                    <button type="button" onClick={this.toggleMenu}>{this.props.username}</button>
                     <div className={dropdownClass}>
                         <a onClick={this.handleLogout}>Log Out</a>
                         <a onClick={this.handleManage}>Manage Account</a>
@@ -57,7 +57,7 @@ class AccountMenu extends Component{
         else{
             return(
                 <div>
-                    <button onClick={this.handleLogin}>Log In</button>
+                    <button type="button" onClick={this.handleLogin}>Log In</button>
                 </div>
             )
         }

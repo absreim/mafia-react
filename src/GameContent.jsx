@@ -3,6 +3,7 @@
 import React, {Component} from "react"
 import io from "socket.io-client"
 import Shared from "./Shared"
+import Lobby from "./Lobby"
 
 class GameContent extends Component{
     constructor(props){
@@ -21,6 +22,8 @@ class GameContent extends Component{
         this.handleMainMenu = this.handleMainMenu.bind(this)
         this.connectSocket = this.connectSocket.bind(this)
         this.handleContinue = this.handleContinue.bind(this)
+        this.navigateCreate = this.navigateCreate.bind(this)
+        this.joinGame = this.joinGame.bind(this)
     }
     componentDidMount(){
         const socket = io("http://localhost:3001/socket.io",{
@@ -95,6 +98,10 @@ class GameContent extends Component{
         })
         socket.on(Shared.ServerSocketEvent.LOBBYSTATE, function(data){
             if(data){
+                let trimmedLobbyData = {} // lobby data sent contains a lot of extraneous information
+                for(gameName of Object.keys(data)){
+                    trimmedLobbyData[gameName] = data[gameName].gameState.players
+                }
                 this.setState({lobbyState: data})
             }
             else{
@@ -127,6 +134,12 @@ class GameContent extends Component{
             this.state.socket.emit(Shared.ClientSocketEvent.SUBSCRIBELOBBYUPDATES)
         }
     }
+    navigateCreate(){
+        //todo
+    }
+    joinGame(gameName){
+        //todo
+    }
     render(){
         if(this.state.socketConnected){
             if(this.state.awaitingStatus){
@@ -134,17 +147,17 @@ class GameContent extends Component{
                     <div>
                         <h2>Connection Established</h2>
                         <h3>Requested player status from server. Awaiting response...</h3>
-                        <button onClick={this.handleMainMenu}>Return to Main Menu</button>
+                        <button type="button" onClick={this.handleMainMenu}>Return to Main Menu</button>
                     </div>
                 )
             }
             else{
                 if(this.state.gameState){
-
+                    //todo
                 }
                 else{
                     if(this.state.lobbyState){
-
+                        return <Lobby lobbyGames={this.state.lobbyState} navigateCreate={this.navigateCreate} joinGame={this.joinGame} />
                     }
                     else{
                         if(this.state.gameName){ // splash screen to inform user that they were previously in a game and will be returned to that game
@@ -152,7 +165,7 @@ class GameContent extends Component{
                                 <div>
                                     <h2>Welcome back!</h2>
                                     <h3>Our records show that you were previously in the game {this.state.gameName}</h3>
-                                    <button onClick={this.handleContinue}>Continue</button>
+                                    <button type="button" onClick={this.handleContinue}>Continue</button>
                                 </div>
                             )
                         }
@@ -161,7 +174,7 @@ class GameContent extends Component{
                                 <div>
                                     <h2>Entering Lobby</h2>
                                     <h3>It looks like you are not part of an existing game. Click the button below to enter the lobby where you can create a new game or join an existing game.</h3>
-                                    <button onClick={this.handleContinue}>Continue</button>
+                                    <button type="button" onClick={this.handleContinue}>Continue</button>
                                 </div>
                             )
                         }
@@ -175,8 +188,8 @@ class GameContent extends Component{
                     <div>
                         <h2>Connect to the Game</h2>
                         <h3>Error connecting to server. You may try connecting again. If problem persists, please try again later.</h3>
-                        <button onClick={this.connectSocket}>Retry Connection</button>
-                        <button onClick={this.handleMainMenu}>Return to Main Menu</button>
+                        <button type="button" onClick={this.connectSocket}>Retry Connection</button>
+                        <button type="button" onClick={this.handleMainMenu}>Return to Main Menu</button>
                     </div>
                 )
             }
@@ -185,8 +198,8 @@ class GameContent extends Component{
                     <div>
                         <h2>Connect to the Game</h2>
                         <h3>Attempt to connect to the server has timed out. You may try connecting again. If problem persists, please try again later.</h3>
-                        <button onClick={this.connectSocket}>Retry Connection</button>
-                        <button onClick={this.handleMainMenu}>Return to Main Menu</button>
+                        <button type="button" onClick={this.connectSocket}>Retry Connection</button>
+                        <button type="button" onClick={this.handleMainMenu}>Return to Main Menu</button>
                     </div>
                 )
             }
@@ -194,8 +207,8 @@ class GameContent extends Component{
                 return(
                     <div>
                         <h2>Connect to the Game</h2>
-                        <button onClick={this.connectSocket}>Connect</button>
-                        <button onClick={this.handleMainMenu}>Return to Main Menu</button>
+                        <button type="button" onClick={this.connectSocket}>Connect</button>
+                        <button type="button" onClick={this.handleMainMenu}>Return to Main Menu</button>
                     </div>
                 )
             }

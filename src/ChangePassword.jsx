@@ -38,9 +38,9 @@ class ChangePassword extends Component{
                 <p>Enter your existing password to change the password for the account 
                     <span className="external-info">{this.props.username}</span></p>
                 <label htmlFor="old">Current password:</label>
-                <input type="password" value={this.state.old} onChange={this.handleOldChange} />
+                <input id="old" type="password" value={this.state.old} onChange={this.handleOldChange} />
                 <label htmlFor="new">New password:</label>
-                <input type="password" value={this.state.new} onChange={this.handleNewChange} />
+                <input id="new" type="password" value={this.state.new} onChange={this.handleNewChange} />
                 <input type="submit" value="Submit" />
             </form>
         )
