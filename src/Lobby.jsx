@@ -47,7 +47,7 @@ class Lobby extends Component{
         )}
         let playersInGameRows = null
         if(this.state.selectedGame && this.props.lobbyGames[this.state.selectedGame]){
-            playersInGameRows = this.props.lobbyGames[this.state.selectedGame].players.map((player) =>
+            playersInGameRows = Array.from(this.props.lobbyGames[this.state.selectedGame].players).map((player) =>
                 <tr key={player}>
                     <td>{player}</td>
                 </tr>
@@ -57,23 +57,25 @@ class Lobby extends Component{
             <div>
                 <h2>Games Lobby</h2>
                 <table>
+                    <caption>List of games in lobby along with attributes.</caption>
                     <thead>
                         <tr>
-                            <td>Games in Lobby</td>
+                            <th colSpan="4">Games in Lobby</th>
                         </tr>
                         <tr>
-                            <td>Name</td>
-                            <td># Players in Game</td>
-                            <td>Max Players</td>
-                            <td># Werewolves</td>
+                            <th>Name</th>
+                            <th># Players in Game</th>
+                            <th>Max Players</th>
+                            <th># Werewolves</th>
                         </tr>
                     </thead>
                     <tbody>{lobbyGameRows}</tbody>
                 </table>
                 <table>
+                    <caption>List of players in selected game.</caption>
                     <thead>
                         <tr>
-                            <td>Players in Selected Game</td>
+                            <th>Players in Selected Game</th>
                         </tr>
                     </thead>
                     <tbody>{playersInGameRows}</tbody>
