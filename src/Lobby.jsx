@@ -45,6 +45,11 @@ class Lobby extends Component{
                     <td>{this.state.lobbyGames[gameName].numWerewolves}</td>
                 </tr>
         )}
+        else{
+            <tr>
+                <td>Waiting for lobby information to load...</td>
+            </tr>
+        }
         let playersInGameRows = null
         if(this.state.selectedGame && this.props.lobbyGames[this.state.selectedGame]){
             playersInGameRows = Array.from(this.props.lobbyGames[this.state.selectedGame].players).map((player) =>

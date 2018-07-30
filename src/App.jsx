@@ -17,6 +17,16 @@ import GameContent from "./GameContent"
 import MessageBar from "./MessageBar"
 import Shared from "./Shared"
 
+const ContentEnum = {
+  AccountCreation: "AccountCreation",
+  AccountDelete: "AccountDelete",
+  AccountLogin: "AccountLogin",
+  AccountManage: "AccountManage",
+  ChangePassword: "ChangePassword",
+  GameContent: "GameContent",
+  MainMenu: "MainMenu",
+  Welcome: "Welcome"
+}
 
 class App extends Component {
   constructor(props){
@@ -508,17 +518,6 @@ class App extends Component {
       </table>
     )
   }
-}
-
-const ContentEnum = {
-  AccountCreation: "AccountCreation",
-  AccountDelete: "AccountDelete",
-  AccountLogin: "AccountLogin",
-  AccountManage: "AccountManage",
-  ChangePassword: "ChangePassword",
-  GameContent: "GameContent",
-  MainMenu: "MainMenu",
-  Welcome: "Welcome"
 }
 
 export default App
