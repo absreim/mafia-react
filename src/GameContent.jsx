@@ -30,7 +30,8 @@ class GameContent extends Component{
             lobbyState: null,
             lobbyGameState: null,
             lobbyUpdatesSubscribed: false, // protects against an unlikely race condition
-            gameName: null
+            gameName: null,
+            message: null
         }
         this.handleMainMenu = this.handleMainMenu.bind(this)
         this.connectSocket = this.connectSocket.bind(this)
@@ -97,7 +98,7 @@ class GameContent extends Component{
             })
             console.log("Error encountered by the socket.io client: " + error)
         }).bind(this))
-        socket.on(Shared.ServerSocketEvent.STATUSREPLY, function(data){
+        socket.on(Shared.ServerSocketEvent.STATUSREPLY, function(data){ //todo
             if(this.state.awaitingStatus){
                 if(data.game){
                     this.setState({
@@ -216,6 +217,35 @@ class GameContent extends Component{
                 }
             }
         })
+        socket.on(Shared.ServerSocketEvent.CREATEGAMEOUTCOME, function(data){
+            // no effort made to preserve order when it comes to requests and outcomes, since
+            // the client is forced to accept whatever ultimate outcome is given the client last
+            switch(data){
+                case Shared.CreateGameOutcome.SUCCESS:
+                    this.state.socket.emit(Shared.ClientSocketEvent.STATUSREQUEST)
+                    break
+                case Shared.CreateGameOutcome.TOOMANYWEREWOLVES:
+                    this.setState({message: "Server reports that the game creation request specified too many werewolves. This outcome implies a inconsistency between the client and server. Please report this issue and try a smaller number of werewolves."})
+                    break
+                case Shared.CreateGameOutcome.NOTENOUGHWEREWOLVES:
+                    this.setState({message: "Server reports that the game creation request specified too few werewolves. This outcome implies a inconsistency between the client and server. Please report this issue and try a larger number of werewolves."})
+                    break
+                case Shared.CreateGameOutcome.NOTENOUGHPLAYERS:
+                    this.setState({message: "Server reports that the game creation request specified too few players. This outcome implies a inconsistency between the client and server. Please report this issue and try a larger number of players."})
+                    break
+                case Shared.CreateGameOutcome.NAMEEXISTS:
+                    this.setState({message: "There already exists a game with the name you tried to create. Please use a different name."})
+                    break
+                case Shared.CreateGameOutcome.MISSINGINFO:
+                    this.setState({message: "Protocol mismatch between the client and server. Please report this issue and try again later."})
+                    break
+                case Shared.CreateGameOutcome.INTERNALERROR:
+                    this.setState({message: "Internal error encountered by server when processing request to create game. Please try again later."})
+                    break
+                default:
+                    this.setState({message: "Unrecognized message received from server in response to request to create game. Please report this issue and try again later."})
+            }
+        })
         this.setState({socket: socket})
     }
     componentWillUnmount(){
@@ -258,7 +288,16 @@ class GameContent extends Component{
         }
     }
     createGame(name, numPlayers, numWerewolves){
-        //todo
+        if(this.state.phase === GameContentPhase.CREATEGAME){
+            this.state.socket.emit(Shared.ClientSocketEvent.CREATEGAME, {
+                name: name,
+                numPlayers: numPlayers,
+                numWerewolves: numWerewolves
+            })
+        }
+        else{
+            console.log("Warning: request to create game received when not in CREATEGAME phase.")
+        }
     }
     joinGame(gameName){
         //todo
@@ -285,87 +324,86 @@ class GameContent extends Component{
         }
     }
     render(){
+        let content = null
         switch(this.state.phase){
             case GameContentPhase.INITIAL:
                 if(this.state.socketConnectError){
-                    return(
+                    content =
                         <div>
                             <h2>Connect to the Game</h2>
                             <h3>Error connecting to server. You may try connecting again. If problem persists, please try again later.</h3>
                             <button type="button" onClick={this.connectSocket}>Retry Connection</button>
                             <button type="button" onClick={this.handleMainMenu}>Return to Main Menu</button>
                         </div>
-                    )
                 }
                 else if(this.state.socketConnectTimeout){
-                    return(
+                    content =
                         <div>
                             <h2>Connect to the Game</h2>
                             <h3>Attempt to connect to the server has timed out. You may try connecting again. If problem persists, please try again later.</h3>
                             <button type="button" onClick={this.connectSocket}>Retry Connection</button>
                             <button type="button" onClick={this.handleMainMenu}>Return to Main Menu</button>
                         </div>
-                    )
                 }
                 else{
-                    return(
+                    content =
                         <div>
                             <h2>Connect to the Game</h2>
                             <button type="button" onClick={this.connectSocket}>Connect</button>
                             <button type="button" onClick={this.handleMainMenu}>Return to Main Menu</button>
                         </div>
-                    )
                 }
             case GameContentPhase.AWAITINGINITIALSTATUS:
-                return(
+                content =
                     <div>
                         <h2>Connection Established</h2>
                         <h3>Requested player status from server. Awaiting response...</h3>
                         <button type="button" onClick={this.handleMainMenu}>Return to Main Menu</button>
                     </div>
-                )
             case GameContentPhase.PREVIOUSSTATUSPAGE:
                 if(this.state.gameName){ // splash screen to inform user that they were previously in a game and will be returned to that game
-                    return(
+                    content =
                         <div>
                             <h2>Welcome back!</h2>
                             <h3>Our records show that you were previously in the game {this.state.gameName}</h3>
                             <button type="button" onClick={this.handleContinue}>Continue</button>
                         </div>
-                    )
                 }
                 else{
-                    return(
+                    content =
                         <div>
                             <h2>Entering Lobby</h2>
                             <h3>It looks like you are not part of an existing game. Click the button below to enter the lobby where you can create a new game or join an existing game.</h3>
                             <button type="button" onClick={this.handleContinue}>Continue</button>
                         </div>
-                    )
                 }
             case GameContentPhase.INLOBBY:
-                return <Lobby lobbyGames={this.state.lobbyState} navigateCreate={this.navigateCreate} joinGame={this.joinGame} />
+                content = <Lobby lobbyGames={this.state.lobbyState} navigateCreate={this.navigateCreate} joinGame={this.joinGame} />
             case GameContentPhase.CREATEGAME:
-                return <CreateGame navigateLobby={this.navigateLobbyFromCreate} createGame={this.createGame} />    
+                content = <CreateGame navigateLobby={this.navigateLobbyFromCreate} createGame={this.createGame} />    
             case GameContentPhase.INLOBBYGAME:
-                return <LobbyGameWaiting gameName={this.state.gameName} gameState={this.state.lobbyGameState} leaveGame={this.leaveGame} />
+                content = <LobbyGameWaiting gameName={this.state.gameName} gameState={this.state.lobbyGameState} leaveGame={this.leaveGame} />
             case GameContentPhase.DISCONNECTED:
-                return(
+                content =
                     <div>
                         <h2>Disconnected</h2>
                         <h3>You have been disconnected. You may attempt to reconnect. If you are unable to do so, please try again later.</h3>
                         <button type="button" onClick={this.connectSocket}>Connect</button>
                         <button type="button" onClick={this.handleMainMenu}>Return to Main Menu</button>
                     </div>
-                )
             default:
-                return(
+                content =
                     <div>
                         <h2>Error</h2>
                         <h3>Internal error with the client application. Please try again later.</h3>
                     </div>
-                )
         }
+        return(
+            <div>
+                <p>{this.state.message}</p>
+                {content}
+            </div>
+        )
     }
 }
 
