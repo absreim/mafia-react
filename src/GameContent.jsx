@@ -31,6 +31,7 @@ class GameContent extends Component{
             lobbyGameState: null,
             lobbyUpdatesSubscribed: false, // protects against an unlikely race condition
             gameName: null,
+            isLobbyGame: false,
             message: null
         }
         this.handleMainMenu = this.handleMainMenu.bind(this)
@@ -99,20 +100,23 @@ class GameContent extends Component{
             console.log("Error encountered by the socket.io client: " + error)
         }).bind(this))
         socket.on(Shared.ServerSocketEvent.STATUSREPLY, function(data){ //todo
-            if(this.state.awaitingStatus){
-                if(data.game){
+            if(this.state.phase === GameContentPhase.AWAITINGINITIALSTATUS){
+                if(data.game && data.isLobbyGame){
                     this.setState({
-                        gameName: data.game
+                        gameName: data.game,
+                        isLobbyGame: data.isLobbyGame,
+                        phase: PREVIOUSSTATUSPAGE
                     })
                 }
                 else{
                     this.setState({
-                        gameName: null
+                        gameName: null,
+                        phase: PREVIOUSSTATUSPAGE
                     })
                 }
             }
             else{
-                console.log("Warning: unsolicited status update request reply messsage received from server.")
+                this.requestStateDetails()
             }
         })
         socket.on(Shared.ServerSocketEvent.LOBBYSTATE, function(data){
@@ -224,6 +228,9 @@ class GameContent extends Component{
                 case Shared.CreateGameOutcome.SUCCESS:
                     this.state.socket.emit(Shared.ClientSocketEvent.STATUSREQUEST)
                     break
+                case Shared.CreateGameOutcome.ALREADYINGAME:
+                    this.setState({message: "Server reports that you are already in a game and must leave it before creating a new one. Please report this issue and try again later."})
+                    break
                 case Shared.CreateGameOutcome.TOOMANYWEREWOLVES:
                     this.setState({message: "Server reports that the game creation request specified too many werewolves. This outcome implies a inconsistency between the client and server. Please report this issue and try a smaller number of werewolves."})
                     break
@@ -246,6 +253,39 @@ class GameContent extends Component{
                     this.setState({message: "Unrecognized message received from server in response to request to create game. Please report this issue and try again later."})
             }
         })
+        socket.on(Shared.ServerSocketEvent.JOINGAMEOUTCOME, function(data){
+            switch(data){
+                case Shared.JoinGameOutcome.SUCCESS:
+                    // no need to request anything since server is expected to send the game state
+                    break
+                case Shared.JoinGameOutcome.ALREADYINGAME:
+                    this.setState({message: "Server reports that you are already in a game and must leave it before joining a new one. Please report this issue and try again later."})
+                    break
+                case Shared.JoinGameOutcome.DOESNOTEXIST:
+                    this.setState({message: "Server reports that the game you are trying to join does not exist. It may have started or have been deleted. Please choose a different game."})
+                    break
+                case Shared.JoinGameOutcome.GAMESTARTED:
+                    this.setState({message: "Server reports that the game you are trying to join has already started. Please choose a different game."})
+                    break
+                case Shared.JoinGameOutcome.INTERNALERROR:
+                    this.setState({message: "Internal error encountered by server when processing request to join game. Please try again later."})
+                    break
+                case Shared.JoinGameOutcome.MISSINGINFO:
+                    this.setState({message: "Protocol mismatch between the client and server. Please report this issue and try again later."})
+                    break
+                default:
+                    this.setState({message: "Unrecognized message received from server in response to request to join game. Please report this issue and try again later."})
+            }
+        })
+        socket.on(Shared.ServerSocketEvent.LEAVEGAMEOUTCOME, function(data){
+            //todo
+        })
+        socket.on(Shared.ServerSocketEvent.LOBBYGAMESTATE, function(data){
+            //todo
+        })
+        socket.on(Shared.ServerSocketEvent.GAMEACTION, function(data){
+            //todo
+        })
         this.setState({socket: socket})
     }
     componentWillUnmount(){
@@ -253,22 +293,33 @@ class GameContent extends Component{
             this.state.socket.close()
         }
     }
-    connectSocket(){
-        this.state.socket.open()
-    }
-    handleMainMenu(){
-        this.props.handleMainMenu()
-    }
-    handleContinue(){
+    requestStateDetails(){
         if(this.state.gameName){ // user in game already, request copy of game state
-            this.state.socket.emit(Shared.ClientSocketEvent.GAMEACTION, Shared.ClientMessageType.GAMESTATEREQ)
+            if(this.state.isLobbyGame){
+                this.state.socket.emit(Shared.ClientSocketEvent.LOBBYGAMESTATEREQUEST)
+            }
+            else{
+                this.state.socket.emit(Shared.ClientSocketEvent.GAMEACTION, Shared.ClientMessageType.GAMESTATEREQ)
+            }
         }
         else{ // no previous game, send user to lobby
             this.state.socket.emit(Shared.ClientSocketEvent.SUBSCRIBELOBBYUPDATES)
             this.setState({phase: GameContentPhase.INLOBBY})
         }
     }
+    connectSocket(){
+        this.state.socket.open()
+    }
+    handleMainMenu(){
+        this.setState({message: null})
+        this.props.handleMainMenu()
+    }
+    handleContinue(){
+        this.setState({message: null})
+        this.requestStateDetails()
+    }
     navigateCreate(){
+        this.setState({message: null})
         if(this.state.phase === GameContentPhase.INLOBBY){
             this.state.socket.emit(Shared.ClientSocketEvent.UNSUBSCRIBELOBBYUPDATES)
             this.setState({lobbyState: null})
@@ -279,6 +330,7 @@ class GameContent extends Component{
         }
     }
     navigateLobbyFromCreate(){
+        this.setState({message: null})
         if(this.state.phase === GameContentPhase.CREATEGAME){
             this.state.socket.emit(Shared.ClientSocketEvent.SUBSCRIBELOBBYUPDATES)
             this.setState({phase: GameContentPhase.INLOBBY})
@@ -288,6 +340,7 @@ class GameContent extends Component{
         }
     }
     createGame(name, numPlayers, numWerewolves){
+        this.setState({message: null})
         if(this.state.phase === GameContentPhase.CREATEGAME){
             this.state.socket.emit(Shared.ClientSocketEvent.CREATEGAME, {
                 name: name,
@@ -300,10 +353,12 @@ class GameContent extends Component{
         }
     }
     joinGame(gameName){
-        //todo
+        this.setState({message: null})
+        socket.emit(Shared.ClientSocketEvent.JOINGAME, {name: gameName})
     }
     leaveGame(){
-        //todo
+        this.setState({message: null})
+        socket.emit(Shared.ClientSocketEvent.LEAVEGAME, {name: this.state.gameName})
     }
     cloneLobbyGameState(gameState){
         if(gameState){
