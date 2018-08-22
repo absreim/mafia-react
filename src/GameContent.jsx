@@ -278,10 +278,30 @@ class GameContent extends Component{
             }
         })
         socket.on(Shared.ServerSocketEvent.LEAVEGAMEOUTCOME, function(data){
-            //todo
+            switch(data){
+                case Shared.LeaveGameOutcome.SUCCESS:
+                    attemptEnterLobby()
+                    break
+                case Shared.LeaveGameOutcome.NOTINGAME:
+                    this.setState({message: "Server reports that you tried to leave a game but was not in a game to begin with."})
+                    break
+                case Shared.LeaveGameOutcome.GAMESTARTED:
+                    this.setState({message: "Attempted to leave game, but the game started by the time the request was processed."})
+                    break
+                case Shared.LeaveGameOutcome.INTERNALERROR:
+                    this.setState({message: "Intenal server error trying to leave game. Please try again later."})
+                    break
+                default:
+                    this.setState({message: "Unrecognized message received from server in response to request to leave game. Please report this issue and try again later."})
+            }
         })
         socket.on(Shared.ServerSocketEvent.LOBBYGAMESTATE, function(data){
-            //todo
+            if(data){
+                this.setState({lobbyGameState: data})
+            }
+            else{
+                this.setState({message: "Lobby game state update message received, but no data was present."})
+            }
         })
         socket.on(Shared.ServerSocketEvent.GAMEACTION, function(data){
             //todo
@@ -293,6 +313,10 @@ class GameContent extends Component{
             this.state.socket.close()
         }
     }
+    attemptEnterLobby(){
+        this.state.socket.emit(Shared.ClientSocketEvent.SUBSCRIBELOBBYUPDATES)
+        this.setState({phase: GameContentPhase.INLOBBY})
+    }
     requestStateDetails(){
         if(this.state.gameName){ // user in game already, request copy of game state
             if(this.state.isLobbyGame){
@@ -303,8 +327,7 @@ class GameContent extends Component{
             }
         }
         else{ // no previous game, send user to lobby
-            this.state.socket.emit(Shared.ClientSocketEvent.SUBSCRIBELOBBYUPDATES)
-            this.setState({phase: GameContentPhase.INLOBBY})
+            attemptEnterLobby()
         }
     }
     connectSocket(){
@@ -408,6 +431,7 @@ class GameContent extends Component{
                             <button type="button" onClick={this.handleMainMenu}>Return to Main Menu</button>
                         </div>
                 }
+                break
             case GameContentPhase.AWAITINGINITIALSTATUS:
                 content =
                     <div>
@@ -415,6 +439,7 @@ class GameContent extends Component{
                         <h3>Requested player status from server. Awaiting response...</h3>
                         <button type="button" onClick={this.handleMainMenu}>Return to Main Menu</button>
                     </div>
+                break
             case GameContentPhase.PREVIOUSSTATUSPAGE:
                 if(this.state.gameName){ // splash screen to inform user that they were previously in a game and will be returned to that game
                     content =
@@ -432,12 +457,16 @@ class GameContent extends Component{
                             <button type="button" onClick={this.handleContinue}>Continue</button>
                         </div>
                 }
+                break
             case GameContentPhase.INLOBBY:
                 content = <Lobby lobbyGames={this.state.lobbyState} navigateCreate={this.navigateCreate} joinGame={this.joinGame} />
+                break
             case GameContentPhase.CREATEGAME:
-                content = <CreateGame navigateLobby={this.navigateLobbyFromCreate} createGame={this.createGame} />    
+                content = <CreateGame navigateLobby={this.navigateLobbyFromCreate} createGame={this.createGame} />
+                break
             case GameContentPhase.INLOBBYGAME:
                 content = <LobbyGameWaiting gameName={this.state.gameName} gameState={this.state.lobbyGameState} leaveGame={this.leaveGame} />
+                break
             case GameContentPhase.DISCONNECTED:
                 content =
                     <div>
@@ -446,6 +475,7 @@ class GameContent extends Component{
                         <button type="button" onClick={this.connectSocket}>Connect</button>
                         <button type="button" onClick={this.handleMainMenu}>Return to Main Menu</button>
                     </div>
+                break
             default:
                 content =
                     <div>
