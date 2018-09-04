@@ -4,7 +4,9 @@ import React, {Component} from "react"
 import io from "socket.io-client"
 import Shared from "./Shared"
 import Lobby from "./Lobby"
-import CreateGame from "./CreateGame";
+import CreateGame from "./CreateGame"
+import LobbyGameWaiting from "./LobbyGameWaiting"
+import InGame from "./InGame"
 
 const GameContentPhase = {
     INITIAL: "initial",
@@ -41,6 +43,7 @@ class GameContent extends Component{
         this.joinGame = this.joinGame.bind(this)
         this.leaveGame = this.leaveGame.bind(this)
         this.createGame = this.createGame.bind(this)
+        this.sendGameMessage = this.sendGameMessage.bind(this)
         this.navigateLobbyFromCreate = this.navigateLobbyFromCreate.bind(this)
     }
     componentDidMount(){
@@ -99,7 +102,7 @@ class GameContent extends Component{
             })
             console.log("Error encountered by the socket.io client: " + error)
         }).bind(this))
-        socket.on(Shared.ServerSocketEvent.STATUSREPLY, function(data){ //todo
+        socket.on(Shared.ServerSocketEvent.STATUSREPLY, function(data){
             if(this.state.phase === GameContentPhase.AWAITINGINITIALSTATUS){
                 if(data.game && data.isLobbyGame){
                     this.setState({
@@ -303,8 +306,71 @@ class GameContent extends Component{
                 this.setState({message: "Lobby game state update message received, but no data was present."})
             }
         })
+        socket.on(Shared.ServerSocketEvent.GAMESTARTED, function(){
+            if(this.state.phase === GameContentPhase.INLOBBY){
+                this.state.socket.emit(Shared.ClientSocketEvent.GAMEACTION, Shared.ClientMessageType.GAMESTATEREQ)
+            }
+            else{
+                console.log("Warning: received game started message when client is not known to be in a lobby game.")
+                this.requestStateDetails()
+            }
+        })
         socket.on(Shared.ServerSocketEvent.GAMEACTION, function(data){
-            //todo
+            if(data && data.type){
+                switch(data.type){
+                    case Shared.ServerMessageType.VOTECAST:
+                        if(this.state.gameState){
+                            if(data.playerName && data.choice !== undefined){
+                                let newGameState = this.cloneGameState(this.state.gameState)
+                                newGameState.votes[data.playerName] = data.choice
+                                this.setState({
+                                    phase: GameContentPhase.INGAME,
+                                    gameState: newGameState
+                                })
+                            }
+                            else{
+                                console.log("Warning: received VOTECAST message missing details of the vote.")
+                            }
+                        }
+                        else{
+                            console.log("Warning: received VOTECAST message when game state is not known. Requesting game state update.")
+                            this.state.socket.emit(Shared.ClientSocketEvent.GAMEACTION, Shared.ClientMessageType.GAMESTATEREQ)
+                        }
+                        break
+                    case Shared.ServerMessageType.ACKNOWLEDGEMENT:
+                        if(this.state.gameState){
+                            if(data.playerName){
+                                let newGameState = this.cloneGameState(this.state.gameState)
+                                newGameState.votes.acks.add(data.playerName)
+                                this.setState({
+                                    phase: GameContentPhase.INGAME,
+                                    gameState: newGameState
+                                })
+                            }
+                            else{
+                                console.log("Warning: received ACKNOWLEDGEMENT message missing the acknowledging player.")
+                            }
+                        }
+                        else{
+                            console.log("Warning: received VOTECAST message when game state is not known. Requesting game state update.")
+                            this.state.socket.emit(Shared.ClientSocketEvent.GAMEACTION, Shared.ClientMessageType.GAMESTATEREQ)
+                        }
+                        break
+                    case Shared.ServerMessageType.GAMESTATEINFO:
+                        if(data.info){
+                            this.setState({
+                                phase: GameContentPhase.INGAME,
+                                gameState: data.info
+                            })
+                        }
+                        break
+                    default:
+                        console.log("Warning: GAMEACTION message received with unrecognized type.")
+                }
+            }
+            else{
+                console.log("Warning: received malformed GAMEACTION message.")
+            }
         })
         this.setState({socket: socket})
     }
@@ -382,6 +448,32 @@ class GameContent extends Component{
     leaveGame(){
         this.setState({message: null})
         socket.emit(Shared.ClientSocketEvent.LEAVEGAME, {name: this.state.gameName})
+    }
+    sendGameMessage(message){
+        socket.emit(Shared.ClientSocketEvent.GAMEACTION, message)
+    }
+    cloneGameState(gameState){
+        if(gameState){
+            if(gameState.players && gameState.votes && gameState.acks){
+                let newGameState = new Shared.GameState()
+                for(let player of Object.keys(gameState.players)){
+                    newGameState.players[player] = new Shared.PlayerDetails(gameState.players[player].isWerewolf)
+                    newGameState.players[player].isAlive = gameState.players[player].isAlive
+                }
+                for(let player of Object.keys(gameState.votes)){
+                    newGameState.votes[player] = gameState.votes[player]
+                }
+                for(let player of gameState.acks){
+                    newGameState.acks.add(player)
+                }
+                newGameState.chosenPlayer = gameState.chosenPlayer
+                newGameState.phase = gameState.phase
+                return newGameState
+            }
+        }
+        else{
+            return null
+        }
     }
     cloneLobbyGameState(gameState){
         if(gameState){
@@ -476,6 +568,8 @@ class GameContent extends Component{
                         <button type="button" onClick={this.handleMainMenu}>Return to Main Menu</button>
                     </div>
                 break
+            case GameContentPhase.INGAME:
+                content = <InGame gameState={this.state.gameState} sendGameMessage={this.sendGameMessage}/>
             default:
                 content =
                     <div>
