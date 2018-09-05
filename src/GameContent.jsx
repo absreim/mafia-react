@@ -569,7 +569,7 @@ class GameContent extends Component{
                     </div>
                 break
             case GameContentPhase.INGAME:
-                content = <InGame gameState={this.state.gameState} sendGameMessage={this.sendGameMessage}/>
+                content = <InGame gameState={this.state.gameState} sendGameMessage={this.sendGameMessage} username={this.props.username} />
             default:
                 content =
                     <div>
