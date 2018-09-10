@@ -7,7 +7,7 @@ livingWerewolves - array of living werewolves. Only applicable if the player is 
 livingVillagers - array of living villagers
 deadWerewolves - array of dead werewolves. Only applicable if the player is a werewolf
 deadVillagers - array of dead villagers
-sendSuggestion - function to send suggestion to server
+sendSuggestion(player) - function to send suggestion to server
 */
 
 import React, {Component} from "react"
@@ -28,41 +28,40 @@ class InGameDaytime extends Component{
         this.props.sendSuggestion(player)
     }
     render(){
-        <p>Waiting for a player to suggest a target for execution.</p>
         if(this.props.playerIsWerewolf){
-            const livingVillagersRows = this.props.livingVillagers.map(
-                (player) => {
-                    <tr key={player} onClick={() => this.handleClickPlayer(player)}
-                        className={player === this.state.selectedPlayer ? "player-list__row--selected" : "player-list__row"}>
-                        <td>{player}</td>
-                    </tr>
-                }
-            )
-            const deadVillagersRows = this.props.deadVillagers.map(
-                (player) => {
+            const deadVillagersRows = Array.from(this.props.deadVillagers).map((player) => {
+                return (
                     <tr key={player}
                         className="player-list__row">
                         <td>{player}</td>
                     </tr>
-                }
-            )
-            const livingWerewolvesRows = this.props.livingWerewolves.map(
-                (player) => {
-                    <tr key={player} onClick={() => this.handleClickPlayer(player)}
-                        className={player === this.state.selectedPlayer ? "player-list__row--selected" : "player-list__row"}>
-                        <td>{player}</td>
-                    </tr>
-                }
-            )
-            const deadWerewolvesRows = this.props.deadWerewolves.map(
-                (player) => {
+                )
+            })
+            const deadWerewolvesRows = Array.from(this.props.deadWerewolves).map((player) => {
+                return (
                     <tr key={player}
                         className="player-list__row">
                         <td>{player}</td>
                     </tr>
-                }
-            )
+                )
+            })
             if(this.props.username in this.props.livingWerewolves){
+                const livingVillagersRows =  Array.from(this.props.livingVillagers).map((player) => {
+                    return (
+                        <tr key={player} onClick={() => this.handleClickPlayer(player)}
+                            className={player === this.state.selectedPlayer ? "player-list__row--selected" : "player-list__row"}>
+                            <td>{player}</td>
+                        </tr>
+                    )
+                })
+                const livingWerewolvesRows =  Array.from(this.props.livingWerewolves).map((player) => {
+                    return (
+                        <tr key={player} onClick={() => this.handleClickPlayer(player)}
+                            className={player === this.state.selectedPlayer ? "player-list__row--selected" : "player-list__row"}>
+                            <td>{player}</td>
+                        </tr>
+                    )
+                })
                 return (
                     <div>
                         <h2>It is the daytime.</h2>
@@ -71,28 +70,36 @@ class InGameDaytime extends Component{
                         <table>
                             <caption>List of living villagers.</caption>
                             <thead>
-                                <th>Living Villagers</th>
+                                <tr>
+                                    <th>Living Villagers</th>
+                                </tr>
                             </thead>
                             <tbody>{livingVillagersRows}</tbody>
                         </table>
                         <table>
                             <caption>List of living werewolves.</caption>
                             <thead>
-                                <th>Living Werewolves</th>
+                                <tr>
+                                    <th>Living Werewolves</th>
+                                </tr>
                             </thead>
                             <tbody>{livingWerewolvesRows}</tbody>
                         </table>
                         <table>
                             <caption>List of dead villagers.</caption>
                             <thead>
-                                <th>Dead Villagers</th>
+                                <tr>
+                                    <th>Dead Villagers</th>
+                                </tr>
                             </thead>
                             <tbody>{deadVillagersRows}</tbody>
                         </table>
                         <table>
                             <caption>List of dead werewolves.</caption>
                             <thead>
-                                <th>Dead Werewolves</th>
+                                <tr>
+                                    <th>Dead Werewolves</th>
+                                </tr>
                             </thead>
                             <tbody>{deadWerewolvesRows}</tbody>
                         </table>
@@ -104,24 +111,62 @@ class InGameDaytime extends Component{
                 )
             }
             else{
+                const livingVillagersRows = Array.from(this.props.livingVillagers).map((player) => {
+                    return (
+                        <tr key={player} onClick={() => this.handleClickPlayer(player)}
+                            className="player-list__row">
+                            <td>{player}</td>
+                        </tr>
+                    )
+                })
+                const livingWerewolvesRows = Array.from(this.props.livingWerewolves).map((player) => {
+                    return (
+                        <tr key={player} onClick={() => this.handleClickPlayer(player)}
+                            className="player-list__row">
+                            <td>{player}</td>
+                        </tr>
+                    )
+                })
                 return (
                     <div>
                         <h2>It is the daytime.</h2>
                         <p>You are a werewolf and you are dead.</p>
                         <p>In this phase, someone must suggest a living player to execute. First come first serve.</p>
                         <table>
-                            <caption>List of living players.</caption>
+                            <caption>List of living villagers.</caption>
                             <thead>
-                                <th>Living Players</th>
+                                <tr>
+                                    <th>Living Villagers</th>
+                                </tr>
                             </thead>
-                            <tbody>{livingPlayersRows}</tbody>
+                            <tbody>{livingVillagersRows}</tbody>
                         </table>
                         <table>
-                            <caption>List of dead players.</caption>
+                            <caption>List of living werewolves.</caption>
                             <thead>
-                                <th>Dead Players</th>
+                                <tr>
+                                    <th>Living Werewolves</th>
+                                </tr>
                             </thead>
-                            <tbody>{deadPlayersRows}</tbody>
+                            <tbody>{livingWerewolvesRows}</tbody>
+                        </table>
+                        <table>
+                            <caption>List of dead villagers.</caption>
+                            <thead>
+                                <tr>
+                                    <th>Dead Villagers</th>
+                                </tr>
+                            </thead>
+                            <tbody>{deadVillagersRows}</tbody>
+                        </table>
+                        <table>
+                            <caption>List of dead werewolves.</caption>
+                            <thead>
+                                <tr>
+                                    <th>Dead Werewolves</th>
+                                </tr>
+                            </thead>
+                            <tbody>{deadWerewolvesRows}</tbody>
                         </table>
                         <p>Waiting for a player to suggest a target for execution. Since you are dead, you
                             cannot make a suggestion.</p>
@@ -130,15 +175,7 @@ class InGameDaytime extends Component{
             }
         }
         else{
-            const livingPlayersRows = this.props.livingVillagers.map(
-                (player) => {
-                    <tr key={player} onClick={() => this.handleClickPlayer(player)}
-                        className={player === this.state.selectedPlayer ? "player-list__row--selected" : "player-list__row"}>
-                        <td>{player}</td>
-                    </tr>
-                }
-            )
-            const deadPlayersRows = this.props.deadVillagers.map(
+            const deadPlayersRows = Array.from(this.props.deadVillagers).map(
                 (player) => {
                     <tr key={player}
                         className="player-list__row">
@@ -147,6 +184,14 @@ class InGameDaytime extends Component{
                 }
             )
             if(this.props.username in this.props.livingVillagers){
+                const livingPlayersRows = Array.from(this.props.livingVillagers).map(
+                    (player) => {
+                        <tr key={player} onClick={() => this.handleClickPlayer(player)}
+                            className={player === this.state.selectedPlayer ? "player-list__row--selected" : "player-list__row"}>
+                            <td>{player}</td>
+                        </tr>
+                    }
+                )
                 return (
                     <div>
                         <h2>It is the daytime.</h2>
@@ -155,14 +200,18 @@ class InGameDaytime extends Component{
                         <table>
                             <caption>List of living players.</caption>
                             <thead>
-                                <th>Living Players</th>
+                                <tr>
+                                    <th>Living Players</th>
+                                </tr>
                             </thead>
                             <tbody>{livingPlayersRows}</tbody>
                         </table>
                         <table>
                             <caption>List of dead players.</caption>
                             <thead>
-                                <th>Dead Players</th>
+                                <tr>
+                                    <th>Dead Players</th>
+                                </tr>
                             </thead>
                             <tbody>{deadPlayersRows}</tbody>
                         </table>
@@ -174,6 +223,14 @@ class InGameDaytime extends Component{
                 )
             }
             else{
+                const livingPlayersRows = Array.from(this.props.livingVillagers).map(
+                    (player) => {
+                        <tr key={player} onClick={() => this.handleClickPlayer(player)}
+                            className="player-list__row">
+                            <td>{player}</td>
+                        </tr>
+                    }
+                )
                 return (
                     <div>
                         <h2>It is the daytime.</h2>
@@ -182,14 +239,18 @@ class InGameDaytime extends Component{
                         <table>
                             <caption>List of living players.</caption>
                             <thead>
-                                <th>Living Players</th>
+                                <tr>
+                                    <th>Living Players</th>
+                                </tr>
                             </thead>
                             <tbody>{livingPlayersRows}</tbody>
                         </table>
                         <table>
                             <caption>List of dead players.</caption>
                             <thead>
-                                <th>Dead Players</th>
+                                <tr>
+                                    <th>Dead Players</th>
+                                </tr>
                             </thead>
                             <tbody>{deadPlayersRows}</tbody>
                         </table>

@@ -7,7 +7,7 @@ username - the name of the account for which a password change
 is being made
 */
 
-import React,{Component} from "react"
+import React, {Component} from "react"
 import "./ChangePassword.css"
 
 class ChangePassword extends Component{

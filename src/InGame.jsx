@@ -11,6 +11,7 @@ to the server. Types defined in Shared.ClientMessageType.
 import React, {Component} from "react"
 import Shared from "./Shared"
 import InGameStarted from "./InGameStarted"
+import InGameDaytime from "./InGameDaytime"
 
 class InGame extends Component{
     
@@ -28,13 +29,59 @@ class InGame extends Component{
             choice: player
         })
     }
+    getWerewolvesVillagersByLiving(){
+        const livingWerewolvesSet = new Set()
+        const livingVillagersSet = new Set()
+        const deadWerewolvesSet = new Set()
+        const deadVillagersSet = new Set()
+        for(player of Object.keys(this.props.gameState.players)){
+            if(this.props.gameState.players[player].isAlive){
+                if(this.props.gameState.players[player].isWerewolf){
+                    livingWerewolvesSet.add(player)
+                }
+                else{
+                    livingVillagersSet.add(player)
+                }
+            }
+            else{
+                if(this.props.gameState.players[player].isWerewolf){
+                    deadWerewolvesSet.add(player)
+                }
+                else{
+                    deadVillagersSet.add(player)
+                }
+            }
+        }
+        return {
+            livingWerewolvesSet: livingWerewolvesSet,
+            livingVillagersSet: livingVillagersSet,
+            deadWerewolvesSet: deadWerewolvesSet,
+            deadVillagersSet: deadVillagersSet
+        }
+    }
+    getPlayersByLiving(){
+        const livingPlayersSet = new Set()
+        const deadPlayersSet = new Set()
+        for(player of Object.keys(this.props.gameState.players)){
+            if(this.props.gameState.players[player].isAlive){
+                livingPlayersSet.add(player)
+            }
+            else{
+                deadPlayersSet.add(player)
+            }
+        }
+        return {
+            livingPlayersSet: livingPlayersSet,
+            deadPlayersSet: deadPlayersSet
+        }
+    }
     render(){
         if(this.props.gameState){
             if(this.props.username in Object.keys(this.props.gameState.players)){
                 switch(this.props.gameState.phase){
                     case Shared.Phases.STARTED:
                         if(this.props.gameState.players[this.props.username].isWerewolf){
-                            const  werewolvesSet = new Set()
+                            const werewolvesSet = new Set()
                             const villagersSet = new Set()
                             for(player of Object.keys(this.props.gameState.players)){
                                 if(this.props.gameState.players[player].isWerewolf){
@@ -45,60 +92,47 @@ class InGame extends Component{
                                 }
                             }
                             return <InGameStarted username={this.props.username} playerIsWerewolf={true} 
-                                werewolves={Array.from(werewolvesSet)} villagers={Array.from(villagersSet)} 
-                                sendAck={this.sendAck} />
+                                werewolves={werewolvesSet} villagers={villagersSet} 
+                                acks={this.props.gameState.acks} sendAck={this.sendAck} />
                         }
                         else{
                             return <InGameStarted username={this.props.username} playerIsWerewolf={false} 
-                                werewolves={null} villagers={Object.keys(this.props.gameState.players)} 
-                                sendAck={this.sendAck} />
+                                werewolves={null} villagers={new Set(Object.keys(this.props.gameState.players))} 
+                                acks={this.props.gameState.acks} sendAck={this.sendAck} />
                         }
                     case Shared.Phases.DAYTIME:
                         if(this.props.gameState.players[this.props.username].isWerewolf){
-                            const livingWerewolvesSet = new Set()
-                            const livingVillagersSet = new Set()
-                            const deadWerewolvesSet = new Set()
-                            const deadVillagersSet = new Set()
-                            for(player of Object.keys(this.props.gameState.players)){
-                                if(this.props.gameState.players[player].isAlive){
-                                    if(this.props.gameState.players[player].isWerewolf){
-                                        livingWerewolvesSet.add(player)
-                                    }
-                                    else{
-                                        livingVillagersSet.add(player)
-                                    }
-                                }
-                                else{
-                                    if(this.props.gameState.players[player].isWerewolf){
-                                        deadWerewolvesSet.add(player)
-                                    }
-                                    else{
-                                        deadVillagersSet.add(player)
-                                    }
-                                }
-                            }
+                            const {livingWerewolvesSet, livingVillagersSet, 
+                                deadWerewolvesSet, deadVillagersSet} = this.getWerewolvesVillagersByLiving()
                             return <InGameDaytime username={this.props.username} playerIsWerewolf={true} 
-                                livingWerewolves={Array.from(livingWerewolvesSet)} livingVillagers={Array.from(livingVillagersSet)} 
-                                deadWerewolves={Array.from(deadWerewolvesSet)} deadVillagers={Array.from(deadVillagersSet)} 
+                                livingWerewolves={livingWerewolvesSet} livingVillagers={livingVillagersSet} 
+                                deadWerewolves={deadWerewolvesSet} deadVillagers={deadVillagersSet} 
                                 sendSuggestion={this.sendSuggestion} />
                         }
                         else{
-                            const livingPlayersSet = new Set()
-                            const deadPlayersSet = new Set()
-                            for(player of Object.keys(this.props.gameState.players)){
-                                if(this.props.gameState.players[player].isAlive){
-                                    livingPlayersSet.add(player)
-                                }
-                                else{
-                                    deadPlayersSet.add(player)
-                                }
-                            }
+                            const {livingPlayersSet, deadPlayersSet} = this.getPlayersByLiving()
                             return <InGameDaytime username={this.props.username} playerIsWerewolf={false} 
-                                livingWerewolves={null} livingVillagers={Array.from(livingPlayersSet)} 
-                                deadWerewolves={null} deadVillagers={Array.from(deadPlayersSet)} 
+                                livingWerewolves={null} livingVillagers={livingPlayersSet} 
+                                deadWerewolves={null} deadVillagers={deadPlayersSet} 
                                 sendSuggestion={this.sendSuggestion} />
                         }
-                    //todo: other cases
+                    case Shared.Phases.DAYTIMEVOTING:
+                        if(this.props.gameState.players[this.props.username].isWerewolf){
+                            const {livingWerewolvesSet, livingVillagersSet, 
+                                deadWerewolvesSet, deadVillagersSet} = this.getWerewolvesVillagersByLiving()
+                            return <InGameDaytimeVoting username={this.props.username} chosenPlayer={this.props.gameState.chosenPlayer}
+                                playerIsWerewolf={true} livingWerewolves={livingWerewolvesSet} 
+                                livingVillagers={livingVillagersSet} deadWerewolves={deadWerewolvesSet}
+                                deadVillagers={deadVillagersSet} sendSuggestion={this.sendSuggestion} />
+                        }
+                        else{
+                            const {livingPlayersSet, deadPlayersSet} = this.getPlayersByLiving()
+                            return <InGameDaytimeVoting username={this.props.username} chosenPlayer={this.props.gameState.chosenPlayer}
+                                playerIsWerewolf={false} livingWerewolves={null} 
+                                livingVillagers={livingVillagersSet} deadWerewolves={null}
+                                deadVillagers={deadVillagersSet} sendSuggestion={this.sendSuggestion} />
+                        }
+                    // todo: other cases
                     default:
                         return <h2>Error: unrecognized game state data received from server.</h2>
                 }

@@ -6,11 +6,11 @@ playerIsWerewolf - boolean value indicating whether the player is a werewolf
 werewolves - array of werewolves. Only applicable if player is a werewolf.
 villagers - array of villagers. If the player is not a werewolf, everyone is
 considered a villager.
+acks - set of players for which the server has received acknowlegements
 sendAck - function for sending acknowledgment that player is ready.
 */
 
 import React, {Component} from "react"
-// todo: highlighting for acknowledgements already received
 class InGameStarted extends Component{
     constructor(props){
         super(props)
@@ -20,16 +20,22 @@ class InGameStarted extends Component{
         this.props.sendAck()
     }
     render(){
-        if(this.props.playerIsWerewolf){
-            let werewolfRows = this.props.werewolves.map((werewolf) => {
-                <tr key={werewolf}>
-                    <td>{werewolf}</td>
-                </tr>
-            })
-            let villagerRows = this.props.villagers.map((villager) => {
+        let villagerRows = Array.from(this.props.villagers).map((villager) => {
+            return (
                 <tr key={villager}>
                     <td>{villager}</td>
+                    <td>{villager in this.props.acks ? "Yes" : "No"}</td>
                 </tr>
+            )
+        })
+        if(this.props.playerIsWerewolf){
+            let werewolfRows = Array.from(this.props.werewolves).map((werewolf) => {
+                return (
+                    <tr key={werewolf}>
+                        <td>{werewolf}</td>
+                        <td>{werewolf in this.props.acks ? "Yes" : "No"}</td>
+                    </tr>
+                )
             })
             return (
                 <div>
@@ -41,7 +47,11 @@ class InGameStarted extends Component{
                         <caption>List of werewolves.</caption>
                         <thead>
                             <tr>
-                                <th>Werewolves</th>
+                                <th colSpan="2">Werewolves</th>
+                            </tr>
+                            <tr>
+                                <th>Name</th>
+                                <th>Ready</th>
                             </tr>
                         </thead>
                         <tbody>{werewolfRows}</tbody>
@@ -50,23 +60,21 @@ class InGameStarted extends Component{
                         <caption>List of villagers.</caption>
                         <thead>
                             <tr>
-                                <th>Villagers</th>
+                                <th colSpan="2">Villagers</th>
+                            </tr>
+                            <tr>
+                                <th>Name</th>
+                                <th>Ready</th>
                             </tr>
                         </thead>
                         <tbody>{villagerRows}</tbody>
                     </table>
-                    <button onClick={this.handleReady}>Ready</button>
+                    <button onClick={this.handleReady}
+                        disabled={this.props.username in this.props.acks}>Ready</button>
                 </div>
             )
         }
         else{
-            let playerRows = this.props.villagers.map(
-                (player) => {
-                    <tr key={player}>
-                        <td>{player}</td>
-                    </tr>
-                }
-            )
             return (
                 <div>
                     <h2>The game has started!</h2>
@@ -76,12 +84,17 @@ class InGameStarted extends Component{
                         <caption>List of players.</caption>
                         <thead>
                             <tr>
-                                <th>Players</th>
+                                <th colSpan="2">Players</th>
+                            </tr>
+                            <tr>
+                                <th>Name</th>
+                                <th>Ready</th>
                             </tr>
                         </thead>
-                        <tbody>{playerRows}</tbody>
+                        <tbody>{villagerRows}</tbody>
                     </table>
-                    <button onClick={this.handleReady}>Ready</button>
+                    <button onClick={this.handleReady} 
+                        disabled={this.props.username in this.props.acks}>Ready</button>
                 </div>
             )
         }

@@ -37,13 +37,15 @@ class Lobby extends Component{
     render(){
         let lobbyGameRows = null
         if(this.props.lobbyGames){
-            lobbyGameRows = Object.keys(this.props.lobbyGames).map((gameName) =>
-                <tr key={gameName} onClick={() => this.handleClick(gameName)} className={gameName === this.state.selectedGame ? "games-table__row--selected" : "games-table__row"}>
-                    <td>{gameName}</td>
-                    <td>{this.state.lobbyGames[gameName].players.size}</td>
-                    <td>{this.state.lobbyGames[gameName].maxPlayers}</td>
-                    <td>{this.state.lobbyGames[gameName].numWerewolves}</td>
-                </tr>
+            lobbyGameRows = Object.keys(this.props.lobbyGames).map((gameName) => {
+                return(
+                    <tr key={gameName} onClick={() => this.handleClick(gameName)} className={gameName === this.state.selectedGame ? "games-table__row--selected" : "games-table__row"}>
+                        <td>{gameName}</td>
+                        <td>{this.state.lobbyGames[gameName].players.size}</td>
+                        <td>{this.state.lobbyGames[gameName].maxPlayers}</td>
+                        <td>{this.state.lobbyGames[gameName].numWerewolves}</td>
+                    </tr>
+                )}
         )}
         else{
             <tr>
@@ -52,11 +54,13 @@ class Lobby extends Component{
         }
         let playersInGameRows = null
         if(this.state.selectedGame && this.props.lobbyGames[this.state.selectedGame]){
-            playersInGameRows = Array.from(this.props.lobbyGames[this.state.selectedGame].players).map((player) =>
-                <tr key={player}>
-                    <td>{player}</td>
-                </tr>
-            )
+            playersInGameRows = Array.from(this.props.lobbyGames[this.state.selectedGame].players).map((player) => {
+                return (
+                    <tr key={player}>
+                        <td>{player}</td>
+                    </tr>
+                )
+            })
         }
         return(
             <div>
