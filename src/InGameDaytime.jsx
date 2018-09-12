@@ -225,8 +225,7 @@ class InGameDaytime extends Component{
             else{
                 const livingPlayersRows = Array.from(this.props.livingVillagers).map(
                     (player) => {
-                        <tr key={player} onClick={() => this.handleClickPlayer(player)}
-                            className="player-list__row">
+                        <tr key={player} className="player-list__row">
                             <td>{player}</td>
                         </tr>
                     }
@@ -262,3 +261,5 @@ class InGameDaytime extends Component{
         }
     }
 }
+
+export default InGameDaytime

@@ -1,21 +1,21 @@
 /*
-Component for in game "daytime voting" phase.
+Component for in game "nighttime voting" phase.
 Required props:
 username - name of the player
-chosenPlayer - name of the player put on trial
+chosenPlayer - name of the player put on trial. Only applicable if the current player is a werewolf.
 playerIsWerewolf - boolean value indicating whether player is a werewolf
-livingWerewolves - array of living werewolves. Only applicable if the player is a werewolf
+livingWerewolves - array of living werewolves. Only applicable if the current player is a werewolf
 livingVillagers - array of living villagers. If player is a villager, contains all living players
-deadWerewolves - array of dead werewolves. Only applicable if the player is a werewolf
+deadWerewolves - array of dead werewolves. Only applicable if the current player is a werewolf
 deadVillagers - array of dead villagers. If player is a villager, contains all dead players
 votes - player name -> vote object of votes already cast, for votes false is nay and true is yea
 sendVote(vote) - function to send vote to server
 */
 
 import React, {Component} from "react"
-import "./InGameDaytimeVoting.css"
+import "./InGameNighttimeVoting.css"
 
-class InGameDaytimeVoting extends Component{
+class InGameNighttimeVoting extends Component{
     constructor(props){
         super(props)
         this.handleYeaVote = this.handleYeaVote.bind(this)
@@ -36,31 +36,29 @@ class InGameDaytimeVoting extends Component{
             )
         })
         const livingVillagersRows = Array.from(this.props.livingVillagers).map((player) => {
-            let vote = "?"
-            if(player in votes){
-                if(votes[player] === true){
-                    vote = "Yea"
-                }
-                else if(votes[player] === false){
-                    vote = "Nay"
-                }
-            }
             return (
                 <tr key={player}>
                     <td>{player}</td>
-                    <td>{vote}</td>
                 </tr>
             )
         })
-        const livingInteractionArea = 
-            <React.Fragment>
-                <button disabled={this.props.username in this.props.votes}
-                    onClick={this.handleYeaVote}>Vote Yea</button>
-                <button disabled={this.props.username in this.props.votes}
-                    onClick={this.handleNayVote}>Vote Nea</button>
-            </React.Fragment>
-        const deadInteractionArea = <p>Waiting for players to vote. Since you are dead, you cannot vote.</p>
         if(this.props.playerIsWerewolf){
+            let interactionArea = null
+            if(this.props.username in this.props.livingWerewolves){
+                interactionArea = (
+                    <React.Fragment>
+                        <button disabled={this.props.username in this.props.votes}
+                            onClick={this.handleYeaVote}>Vote Yea</button>
+                        <button disabled={this.props.username in this.props.votes}
+                            onClick={this.handleNayVote}>Vote Nea</button>
+                    </React.Fragment>
+                )
+            }
+            else{
+                interactionArea = (
+                    <p>As a dead werewolf, you cannot vote but can observe the results.</p>
+                )
+            }
             const deadWerewolvesRows = Array.from(this.props.deadWerewolves).map((player) => {
                 return (
                     <tr key={player}>
@@ -85,29 +83,12 @@ class InGameDaytimeVoting extends Component{
                     </tr>
                 )
             })
-            const playerIsAlive = this.props.username in this.props.livingWerewolves
-            const deathStatusString = playerIsAlive ? "alive" : "dead"
-            const interactionArea = playerIsAlive ? livingInteractionArea : deadInteractionArea
-            return(
+            return (
                 <div>
-                    <h2>It is time to vote in the daytime to execute a suspected werewolf.</h2>
-                    <p>The chosen player is 
+                    <h2>It is time to vote on whether to kill the chosen villager.</h2>
+                    <p>The chosen villager is 
                         <span className=".chosen-player-desc__player-name">{this.props.chosenPlayer}</span>.</p>
-                    <p>You are a werewolf and you are {deathStatusString}.</p>
-                    <p>A simple majority is needed to execute the accused. Cast your vote below.</p>
-                    <table>
-                        <caption>List of living villagers.</caption>
-                        <thead>
-                            <tr>
-                                <th colSpan="2">Living Villagers</th>
-                            </tr>
-                            <tr>
-                                <th>Name</th>
-                                <th>Vote</th>
-                            </tr>
-                        </thead>
-                        <tbody>{livingVillagersRows}</tbody>
-                    </table>
+                    <p>A simple majority is need to kill the chosen villager.</p>
                     <table>
                         <caption>List of living werewolves.</caption>
                         <thead>
@@ -120,6 +101,15 @@ class InGameDaytimeVoting extends Component{
                             </tr>
                         </thead>
                         <tbody>{livingWerewolvesRows}</tbody>
+                    </table>
+                    <table>
+                        <caption>List of living villagers.</caption>
+                        <thead>
+                            <tr>
+                                <th>Living Villagers</th>
+                            </tr>
+                        </thead>
+                        <tbody>{livingVillagersRows}</tbody>
                     </table>
                     <table>
                         <caption>List of dead villagers.</caption>
@@ -144,25 +134,22 @@ class InGameDaytimeVoting extends Component{
             )
         }
         else{
-            const playerIsAlive = this.props.username in this.props.livingVillagers
-            const deathStatusString = playerIsAlive ? "alive" : "dead"
-            const interactionArea = playerIsAlive ? livingInteractionArea : deadInteractionArea
+            let statusDescText = null
+            if(this.props.username in this.props.livingVillagers){
+                statusDescText = "As a villager, you are currently sleeping and must wait until the daytime."
+            }
+            else{
+                statusDescText = "You are a dead villager."
+            }
             return(
                 <div>
-                    <h2>It is time to vote in the daytime to execute a suspected werewolf.</h2>
-                    <p>The chosen player is 
-                        <span className=".chosen-player-desc__player-name">{this.props.chosenPlayer}</span>.</p>
-                    <p>You are a villager and you are {deathStatusString}.</p>
-                    <p>A simple majority is needed to execute the accused. Cast your vote below.</p>
+                    <h2>Werewolves are currently voting on whether to kill a selected villager.</h2>
+                    <p>{statusDescText}</p>
                     <table>
                         <caption>List of living players.</caption>
                         <thead>
                             <tr>
-                                <th colSpan="2">Living Players</th>
-                            </tr>
-                            <tr>
-                                <th>Name</th>
-                                <th>Vote</th>
+                                <th>Living Players</th>
                             </tr>
                         </thead>
                         <tbody>{livingVillagersRows}</tbody>
@@ -176,11 +163,10 @@ class InGameDaytimeVoting extends Component{
                         </thead>
                         <tbody>{deadVillagersRows}</tbody>
                     </table>
-                    {interactionArea}
                 </div>
             )
         }
     }
 }
 
-export default InGameDaytimeVoting
+export default InGameNighttimeVoting

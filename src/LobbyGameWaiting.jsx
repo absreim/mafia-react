@@ -47,3 +47,5 @@ class LobbyGameWaiting extends Component {
         )
     }
 }
+
+export default LobbyGameWaiting

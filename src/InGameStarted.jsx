@@ -100,3 +100,5 @@ class InGameStarted extends Component{
         }
     }   
 }
+
+export default InGameStarted
