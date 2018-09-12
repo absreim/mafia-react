@@ -45,7 +45,7 @@ class InGameDaytime extends Component{
                     </tr>
                 )
             })
-            if(this.props.username in this.props.livingWerewolves){
+            if(this.props.livingWerewolves.has(this.props.username)){
                 const livingVillagersRows =  Array.from(this.props.livingVillagers).map((player) => {
                     return (
                         <tr key={player} onClick={() => this.handleClickPlayer(player)}
@@ -183,7 +183,7 @@ class InGameDaytime extends Component{
                     </tr>
                 }
             )
-            if(this.props.username in this.props.livingVillagers){
+            if(this.props.livingVillagers.has(this.props.username)){
                 const livingPlayersRows = Array.from(this.props.livingVillagers).map(
                     (player) => {
                         <tr key={player} onClick={() => this.handleClickPlayer(player)}

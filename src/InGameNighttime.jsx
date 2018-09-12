@@ -54,7 +54,7 @@ class InGameNighttime extends Component{
             let livingVillagersRows = null
             let statusDescText = null
             let interactionArea = null
-            if(this.props.username in this.props.livingWerewolves){
+            if(this.props.livingWerewolves.has(this.props.username)){
                 livingVillagersRows =  Array.from(this.props.livingVillagers).map((player) => {
                     return (
                         <tr key={player} onClick={() => this.handleClickPlayer(player)}
@@ -147,7 +147,7 @@ class InGameNighttime extends Component{
                 }
             )
             let statusDescText = null
-            if(this.props.username in this.props.livingVillagers){
+            if(this.props.livingVillagers.has(this.props.username)){
                 statusDescText = "As a villager you are currently sleeping and must wait until the daytime."
             }
             else{

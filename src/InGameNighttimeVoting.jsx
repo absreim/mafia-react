@@ -44,7 +44,7 @@ class InGameNighttimeVoting extends Component{
         })
         if(this.props.playerIsWerewolf){
             let interactionArea = null
-            if(this.props.username in this.props.livingWerewolves){
+            if(this.props.livingWerewolves.has(this.props.username)){
                 interactionArea = (
                     <React.Fragment>
                         <button disabled={this.props.username in this.props.votes}
@@ -135,7 +135,7 @@ class InGameNighttimeVoting extends Component{
         }
         else{
             let statusDescText = null
-            if(this.props.username in this.props.livingVillagers){
+            if(this.props.livingVillagers.has(this.props.username)){
                 statusDescText = "As a villager, you are currently sleeping and must wait until the daytime."
             }
             else{

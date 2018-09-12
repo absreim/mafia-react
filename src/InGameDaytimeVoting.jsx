@@ -85,7 +85,7 @@ class InGameDaytimeVoting extends Component{
                     </tr>
                 )
             })
-            const playerIsAlive = this.props.username in this.props.livingWerewolves
+            const playerIsAlive = this.props.livingWerewolves.has(this.props.username)
             const deathStatusString = playerIsAlive ? "alive" : "dead"
             const interactionArea = playerIsAlive ? livingInteractionArea : deadInteractionArea
             return(

@@ -17,6 +17,7 @@ import InGameDaytimeSummary from "./InGameDaytimeSummary"
 import InGameNighttime from "./InGameNighttime"
 import InGameNighttimeVoting from "./InGameNighttimeVoting"
 import InGameNighttimeSummary from "./InGameNighttimeSummary"
+import InGameOver from "./InGameOver"
 
 class InGame extends Component{
     
@@ -113,106 +114,111 @@ class InGame extends Component{
                                 }
                             }
                             return <InGameStarted username={this.props.username} playerIsWerewolf={true} 
-                                werewolves={werewolvesSet} villagers={villagersSet} 
-                                acks={this.props.gameState.acks} sendAck={this.sendAck} />
+                                        werewolves={werewolvesSet} villagers={villagersSet} 
+                                        acks={this.props.gameState.acks} sendAck={this.sendAck} />
                         }
                         else{
                             return <InGameStarted username={this.props.username} playerIsWerewolf={false} 
-                                werewolves={null} villagers={new Set(Object.keys(this.props.gameState.players))} 
-                                acks={this.props.gameState.acks} sendAck={this.sendAck} />
+                                        werewolves={null} villagers={new Set(Object.keys(this.props.gameState.players))} 
+                                        acks={this.props.gameState.acks} sendAck={this.sendAck} />
                         }
                     case Shared.Phases.DAYTIME:
                         if(this.props.gameState.players[this.props.username].isWerewolf){
                             const {livingWerewolvesSet, livingVillagersSet, 
                                 deadWerewolvesSet, deadVillagersSet} = this.getWerewolvesVillagersByLiving()
                             return <InGameDaytime username={this.props.username} playerIsWerewolf={true} 
-                                livingWerewolves={livingWerewolvesSet} livingVillagers={livingVillagersSet} 
-                                deadWerewolves={deadWerewolvesSet} deadVillagers={deadVillagersSet} 
-                                sendSuggestion={this.sendSuggestion} />
+                                        livingWerewolves={livingWerewolvesSet} livingVillagers={livingVillagersSet} 
+                                        deadWerewolves={deadWerewolvesSet} deadVillagers={deadVillagersSet} 
+                                        sendSuggestion={this.sendSuggestion} />
                         }
                         else{
                             const {livingPlayersSet, deadPlayersSet} = this.getPlayersByLiving()
                             return <InGameDaytime username={this.props.username} playerIsWerewolf={false} 
-                                livingWerewolves={null} livingVillagers={livingPlayersSet} 
-                                deadWerewolves={null} deadVillagers={deadPlayersSet} 
-                                sendSuggestion={this.sendSuggestion} />
+                                        livingWerewolves={null} livingVillagers={livingPlayersSet} 
+                                        deadWerewolves={null} deadVillagers={deadPlayersSet} 
+                                        sendSuggestion={this.sendSuggestion} />
                         }
                     case Shared.Phases.DAYTIMEVOTING:
                         if(this.props.gameState.players[this.props.username].isWerewolf){
                             const {livingWerewolvesSet, livingVillagersSet, 
                                 deadWerewolvesSet, deadVillagersSet} = this.getWerewolvesVillagersByLiving()
                             return <InGameDaytimeVoting username={this.props.username} chosenPlayer={this.props.gameState.chosenPlayer}
-                                playerIsWerewolf={true} livingWerewolves={livingWerewolvesSet} 
-                                livingVillagers={livingVillagersSet} deadWerewolves={deadWerewolvesSet}
-                                deadVillagers={deadVillagersSet} sendSuggestion={this.sendSuggestion} />
+                                        playerIsWerewolf={true} livingWerewolves={livingWerewolvesSet} 
+                                        livingVillagers={livingVillagersSet} deadWerewolves={deadWerewolvesSet}
+                                        deadVillagers={deadVillagersSet} sendSuggestion={this.sendSuggestion} />
                         }
                         else{
                             const {livingPlayersSet, deadPlayersSet} = this.getPlayersByLiving()
                             return <InGameDaytimeVoting username={this.props.username} chosenPlayer={this.props.gameState.chosenPlayer}
-                                playerIsWerewolf={false} livingWerewolves={null} 
-                                livingVillagers={livingPlayersSet} deadWerewolves={null}
-                                deadVillagers={deadPlayersSet} sendSuggestion={this.sendSuggestion} />
+                                        playerIsWerewolf={false} livingWerewolves={null} 
+                                        livingVillagers={livingPlayersSet} deadWerewolves={null}
+                                        deadVillagers={deadPlayersSet} sendSuggestion={this.sendSuggestion} />
                         }
                     case Shared.Phases.ENDOFDAY:
                         const {livingPlayersObj, deadPlayersObj} = this.getPlayersByLivingAndFaction()
                         const playerIsWerewolf = this.props.gameState.players[this.props.username].isWerewolf
                         return <InGameDaytimeSummary username={this.props.username} chosenPlayer={this.props.gameState.chosenPlayer}
-                                voteSuccessful={true} playerIsWerewolf={playerIsWerewolf} livingPlayersObj={livingPlayersObj} 
-                                deadPlayers={deadPlayersObj} sendAck={this.sendAck} />
+                                    voteSuccessful={true} playerIsWerewolf={playerIsWerewolf} livingPlayersObj={livingPlayersObj} 
+                                    deadPlayers={deadPlayersObj} sendAck={this.sendAck} />
                     case Shared.Phases.DAYTIMEVOTEFAILED:
                         const {livingPlayersObj, deadPlayersObj} = this.getPlayersByLivingAndFaction()
                         const playerIsWerewolf = this.props.gameState.players[this.props.username].isWerewolf
                         return <InGameDaytimeSummary username={this.props.username} chosenPlayer={this.props.gameState.chosenPlayer}
-                                voteSuccessful={false} playerIsWerewolf={playerIsWerewolf} livingPlayersObj={livingPlayersObj} 
-                                deadPlayers={deadPlayersObj} sendAck={this.sendAck} />
+                                    voteSuccessful={false} playerIsWerewolf={playerIsWerewolf} livingPlayersObj={livingPlayersObj} 
+                                    deadPlayers={deadPlayersObj} sendAck={this.sendAck} />
                     case Shared.Phases.NIGHTTIME:
                         if(this.props.gameState.players[this.props.username].isWerewolf){
                             const {livingWerewolvesSet, livingVillagersSet, 
                                 deadWerewolvesSet, deadVillagersSet} = this.getWerewolvesVillagersByLiving()
                             return <InGameNighttime username={this.props.username} playerIsWerewolf={true} 
-                                livingWerewolves={livingWerewolvesSet} livingVillagers={livingVillagersSet} 
-                                deadWerewolves={deadWerewolvesSet} deadVillagers={deadVillagersSet} 
-                                sendSuggestion={this.sendSuggestion} />
+                                        livingWerewolves={livingWerewolvesSet} livingVillagers={livingVillagersSet} 
+                                        deadWerewolves={deadWerewolvesSet} deadVillagers={deadVillagersSet} 
+                                        sendSuggestion={this.sendSuggestion} />
                         }
                         else{
                             const {livingPlayersSet, deadPlayersSet} = this.getPlayersByLiving()
                             return <InGameNighttime username={this.props.username} playerIsWerewolf={false} 
-                                livingWerewolves={null} livingVillagers={livingPlayersSet} 
-                                deadWerewolves={null} deadVillagers={deadPlayersSet} 
-                                sendSuggestion={this.sendSuggestion} />
+                                        livingWerewolves={null} livingVillagers={livingPlayersSet} 
+                                        deadWerewolves={null} deadVillagers={deadPlayersSet} 
+                                        sendSuggestion={this.sendSuggestion} />
                         }
                     case Shared.Phases.NIGHTTIMEVOTING:
                         if(this.props.gameState.players[this.props.username].isWerewolf){
                             const {livingWerewolvesSet, livingVillagersSet, 
                                 deadWerewolvesSet, deadVillagersSet} = this.getWerewolvesVillagersByLiving()
                             return <InGameNighttimeVoting username={this.props.username} chosenPlayer={this.props.gameState.chosenPlayer}
-                                playerIsWerewolf={true} livingWerewolves={livingWerewolvesSet} 
-                                livingVillagers={livingVillagersSet} deadWerewolves={deadWerewolvesSet}
-                                deadVillagers={deadVillagersSet} sendSuggestion={this.sendSuggestion} />
+                                        playerIsWerewolf={true} livingWerewolves={livingWerewolvesSet} 
+                                        livingVillagers={livingVillagersSet} deadWerewolves={deadWerewolvesSet}
+                                        deadVillagers={deadVillagersSet} sendSuggestion={this.sendSuggestion} />
                         }
                         else{
                             const {livingPlayersSet, deadPlayersSet} = this.getPlayersByLiving()
                             return <InGameNighttimeVoting username={this.props.username} chosenPlayer={this.props.gameState.chosenPlayer}
-                                playerIsWerewolf={false} livingWerewolves={null} 
-                                livingVillagers={livingPlayersSet} deadWerewolves={null}
-                                deadVillagers={deadPlayersSet} sendSuggestion={this.sendSuggestion} />
+                                        playerIsWerewolf={false} livingWerewolves={null} 
+                                        livingVillagers={livingPlayersSet} deadWerewolves={null}
+                                        deadVillagers={deadPlayersSet} sendSuggestion={this.sendSuggestion} />
                         }
                     case Shared.Phases.ENDOFNIGHT:
                         const {livingWerewolvesSet, livingVillagersSet, 
                             deadWerewolvesSet, deadVillagersSet} = this.getWerewolvesVillagersByLiving()
                         const playerIsWerewolf = this.props.gameState.players[this.props.username].isWerewolf
                         return <InGameNighttimeSummary username={this.props.username} chosenPlayer={this.props.gameState.chosenPlayer}
-                                voteSuccessful={true} playerIsWerewolf={playerIsWerewolf} livingVillagers={livingPlayersSet} deadWerewolves={null}
-                                deadVillagers={deadPlayersSet} sendAck={this.sendAck} />
+                                    voteSuccessful={true} playerIsWerewolf={playerIsWerewolf} livingVillagers={livingPlayersSet} deadWerewolves={null}
+                                    deadVillagers={deadPlayersSet} sendAck={this.sendAck} />
                     case Shared.Phases.NIGHTTIMEVOTEFAILED:
                         const {livingWerewolvesSet, livingVillagersSet, 
                             deadWerewolvesSet, deadVillagersSet} = this.getWerewolvesVillagersByLiving()
                         const playerIsWerewolf = this.props.gameState.players[this.props.username].isWerewolf
                         return <InGameNighttimeSummary username={this.props.username} chosenPlayer={this.props.gameState.chosenPlayer}
-                                voteSuccessful={false} playerIsWerewolf={playerIsWerewolf} livingVillagers={livingPlayersSet} deadWerewolves={null}
-                                deadVillagers={deadPlayersSet} sendAck={this.sendAck} />
+                                    voteSuccessful={false} playerIsWerewolf={playerIsWerewolf} livingVillagers={livingPlayersSet} deadWerewolves={null}
+                                    deadVillagers={deadPlayersSet} sendAck={this.sendAck} />
                     case Shared.Phases.OVER:
-                        //todo
+                        const {livingWerewolvesSet, livingVillagersSet, 
+                            deadWerewolvesSet, deadVillagersSet} = this.getWerewolvesVillagersByLiving()
+                        return <InGameOver username={this.props.username} livingWerewolves={livingWerewolvesSet} 
+                                    livingVillagers={livingVillagersSet} deadWerewolves={deadWerewolvesSet} 
+                                    deadVillagers={deadVillagersSet} acks={this.props.gameState.acks} 
+                                    sendAck={this.sendAck}/>
                     default:
                         return <h2>Error: unrecognized game state data received from server.</h2>
                 }
