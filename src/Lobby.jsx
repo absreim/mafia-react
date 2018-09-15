@@ -48,9 +48,12 @@ class Lobby extends Component{
                 )}
         )}
         else{
-            <tr>
-                <td>Waiting for lobby information to load...</td>
-            </tr>
+            return(
+                <tr>
+                    <td>Waiting for lobby information to load...</td>
+                </tr>
+            )
+            
         }
         let playersInGameRows = null
         if(this.state.selectedGame && this.props.lobbyGames[this.state.selectedGame]){

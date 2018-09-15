@@ -157,8 +157,8 @@ class InGameNighttimeSummary extends Component{
                 <p>Please acknowledge the results.</p>
                 {outcomeDesc}
                 {tablesArea}
-                <button onClick={handleAck} 
-                        disabled={username in this.props.acks}>Acknowledge</button>
+                <button onClick={this.handleAck} 
+                        disabled={this.props.username in this.props.acks}>Acknowledge</button>
             </div>
         )
     }

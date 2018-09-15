@@ -108,13 +108,13 @@ class GameContent extends Component{
                     this.setState({
                         gameName: data.game,
                         isLobbyGame: data.isLobbyGame,
-                        phase: PREVIOUSSTATUSPAGE
+                        phase: GameContentPhase.PREVIOUSSTATUSPAGE
                     })
                 }
                 else{
                     this.setState({
                         gameName: null,
-                        phase: PREVIOUSSTATUSPAGE
+                        phase: GameContentPhase.PREVIOUSSTATUSPAGE
                     })
                 }
             }
@@ -283,7 +283,7 @@ class GameContent extends Component{
         socket.on(Shared.ServerSocketEvent.LEAVEGAMEOUTCOME, function(data){
             switch(data){
                 case Shared.LeaveGameOutcome.SUCCESS:
-                    attemptEnterLobby()
+                    this.attemptEnterLobby()
                     break
                 case Shared.LeaveGameOutcome.NOTINGAME:
                     this.setState({message: "Server reports that you tried to leave a game but was not in a game to begin with."})
@@ -393,7 +393,7 @@ class GameContent extends Component{
             }
         }
         else{ // no previous game, send user to lobby
-            attemptEnterLobby()
+            this.attemptEnterLobby()
         }
     }
     connectSocket(){
@@ -443,14 +443,14 @@ class GameContent extends Component{
     }
     joinGame(gameName){
         this.setState({message: null})
-        socket.emit(Shared.ClientSocketEvent.JOINGAME, {name: gameName})
+        this.state.socket.emit(Shared.ClientSocketEvent.JOINGAME, {name: gameName})
     }
     leaveGame(){
         this.setState({message: null})
-        socket.emit(Shared.ClientSocketEvent.LEAVEGAME, {name: this.state.gameName})
+        this.state.socket.emit(Shared.ClientSocketEvent.LEAVEGAME, {name: this.state.gameName})
     }
     sendGameMessage(message){
-        socket.emit(Shared.ClientSocketEvent.GAMEACTION, message)
+        this.state.socket.emit(Shared.ClientSocketEvent.GAMEACTION, message)
     }
     cloneGameState(gameState){
         if(gameState){
@@ -478,7 +478,7 @@ class GameContent extends Component{
     cloneLobbyGameState(gameState){
         if(gameState){
             if(gameState.maxPlayers && gameState.numWerewolves && gameState.players){
-                newGameState = new Shared.LobbyGameState(gameState.maxPlayers, gameState.numWerewolves)
+                const newGameState = new Shared.LobbyGameState(gameState.maxPlayers, gameState.numWerewolves)
                 for(let player of gameState.players){
                     newGameState.players.add(player)
                 }
@@ -570,6 +570,7 @@ class GameContent extends Component{
                 break
             case GameContentPhase.INGAME:
                 content = <InGame gameState={this.state.gameState} sendGameMessage={this.sendGameMessage} username={this.props.username} />
+                break
             default:
                 content =
                     <div>

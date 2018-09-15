@@ -46,7 +46,7 @@ class InGameOver extends Component {
             outcomeDesc = (
                 <p>Werewolves win.</p>
             )
-            livingWerewolvesRows = Array.from(this.props.livingWerewolves).map((player) => {
+            const livingWerewolvesRows = Array.from(this.props.livingWerewolves).map((player) => {
                 return (
                     <tr key={player}
                         className="player-list__row">
@@ -75,7 +75,7 @@ class InGameOver extends Component {
             outcomeDesc = (
                 <p>Villagers win.</p>
             )
-            livingVillagersRows = Array.from(this.props.livingVillagers).map((player) => {
+            const livingVillagersRows = Array.from(this.props.livingVillagers).map((player) => {
                 return (
                     <tr key={player}
                         className="player-list__row">

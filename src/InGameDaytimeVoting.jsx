@@ -37,11 +37,11 @@ class InGameDaytimeVoting extends Component{
         })
         const livingVillagersRows = Array.from(this.props.livingVillagers).map((player) => {
             let vote = "?"
-            if(player in votes){
-                if(votes[player] === true){
+            if(player in this.props.votes){
+                if(this.props.votes[player] === true){
                     vote = "Yea"
                 }
-                else if(votes[player] === false){
+                else if(this.props.votes[player] === false){
                     vote = "Nay"
                 }
             }
@@ -70,11 +70,11 @@ class InGameDaytimeVoting extends Component{
             })
             const livingWerewolvesRows = Array.from(this.props.livingWerewolves).map((player) => {
                 let vote = "?"
-                if(player in votes){
-                    if(votes[player] === true){
+                if(player in this.props.votes){
+                    if(this.props.votes[player] === true){
                         vote = "Yea"
                     }
-                    else if(votes[player] === false){
+                    else if(this.props.votes[player] === false){
                         vote = "Nay"
                     }
                 }

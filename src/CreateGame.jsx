@@ -20,6 +20,7 @@ class CreateGame extends Component{
         this.handleNumPlayersChange = this.handleNumPlayersChange.bind(this)
         this.handleNumWerewolvesChange = this.handleNumWerewolvesChange.bind(this)
         this.handleLobby = this.handleLobby.bind(this)
+        this.getWerewolfHelpText = this.getWerewolfHelpText.bind(this)
     }
     handleNameChange(event){
         this.setState({name: event.target.value})
@@ -35,11 +36,11 @@ class CreateGame extends Component{
     }
     getWerewolfHelpText(){
         if(this.state.numPlayers){
-            let maxWerewolves = Math.floor(numPlayers / 3)
-            if(maxWerewolves * 2 === numPlayers){
+            let maxWerewolves = Math.floor(this.state.numPlayers / 3)
+            if(maxWerewolves * 2 === this.state.numPlayers){
                 maxWerewolves--
             }
-            let recommended = Math.round(Math.sqrt(numPlayers))
+            let recommended = Math.round(Math.sqrt(this.state.numPlayers))
             if(recommended > maxWerewolves){
                 recommended = maxWerewolves
             }
@@ -54,17 +55,20 @@ class CreateGame extends Component{
         this.props.createGame(this.state.name, this.state.numPlayers, this.state.numWerewolves)
     }
     render(){
-        <form onSubmit={this.handleSubmit}>
-            <h2>Create a New Game</h2>
-            <label htmlFor="name">Name</label>
-            <input id="name" type="text" value={this.state.name} onChange={this.handleNameChange} />
-            <label htmlFor="numPlayers">Number of Players (minimum 4)</label>
-            <input id="numPlayers" type="number" value={this.state.numPlayers} onChange={this.handleNumPlayersChange} />
-            <label htmlFor="numWerewolves">Number of Werewolves{getWerewolfHelpText()}</label>
-            <input id="numWerewolves" type="number" value={this.state.numWerewolves} onChange={this.handleNumWerewolvesChange} />
-            <button type="button" onClick={this.handleLobby}>Return to Lobby</button>
-            <button type="submit">Create</button>
-        </form>
+        return (
+            <form onSubmit={this.handleSubmit}>
+                <h2>Create a New Game</h2>
+                <label htmlFor="name">Name</label>
+                <input id="name" type="text" value={this.state.name} onChange={this.handleNameChange} />
+                <label htmlFor="numPlayers">Number of Players (minimum 4)</label>
+                <input id="numPlayers" type="number" value={this.state.numPlayers} onChange={this.handleNumPlayersChange} />
+                <label htmlFor="numWerewolves">Number of Werewolves{this.getWerewolfHelpText()}</label>
+                <input id="numWerewolves" type="number" value={this.state.numWerewolves} onChange={this.handleNumWerewolvesChange} />
+                <button type="button" onClick={this.handleLobby}>Return to Lobby</button>
+                <button type="submit">Create</button>
+            </form>
+        )
+        
     }
 }
 

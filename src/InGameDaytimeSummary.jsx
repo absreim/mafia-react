@@ -162,8 +162,8 @@ class InGameDaytimeSummary extends Component{
                 {outcomeDesc}
                 {votesTable}
                 {deadTable}
-                <button onClick={handleAck} 
-                    disabled={username in this.props.acks}>Acknowledge</button>
+                <button onClick={this.handleAck} 
+                    disabled={this.props.username in this.props.acks}>Acknowledge</button>
             </div>
         )
     }

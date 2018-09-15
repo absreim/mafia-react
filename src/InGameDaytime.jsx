@@ -177,19 +177,25 @@ class InGameDaytime extends Component{
         else{
             const deadPlayersRows = Array.from(this.props.deadVillagers).map(
                 (player) => {
-                    <tr key={player}
-                        className="player-list__row">
-                        <td>{player}</td>
-                    </tr>
+                    return(
+                        <tr key={player}
+                            className="player-list__row">
+                            <td>{player}</td>
+                        </tr>
+                    )
+                    
                 }
             )
             if(this.props.livingVillagers.has(this.props.username)){
                 const livingPlayersRows = Array.from(this.props.livingVillagers).map(
                     (player) => {
-                        <tr key={player} onClick={() => this.handleClickPlayer(player)}
-                            className={player === this.state.selectedPlayer ? "player-list__row--selected" : "player-list__row"}>
-                            <td>{player}</td>
-                        </tr>
+                        return(
+                            <tr key={player} onClick={() => this.handleClickPlayer(player)}
+                                className={player === this.state.selectedPlayer ? "player-list__row--selected" : "player-list__row"}>
+                                <td>{player}</td>
+                            </tr>
+                        )
+
                     }
                 )
                 return (
@@ -225,9 +231,11 @@ class InGameDaytime extends Component{
             else{
                 const livingPlayersRows = Array.from(this.props.livingVillagers).map(
                     (player) => {
-                        <tr key={player} className="player-list__row">
-                            <td>{player}</td>
-                        </tr>
+                        return(
+                            <tr key={player} className="player-list__row">
+                                <td>{player}</td>
+                            </tr>
+                        )
                     }
                 )
                 return (

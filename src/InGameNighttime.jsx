@@ -17,7 +17,7 @@ class InGameNighttime extends Component{
     constructor(props){
         super(props)
         this.state = {
-            selectPlayer = null
+            selectPlayer: null
         }
     }
     handleClickPlayer(player){
@@ -134,16 +134,20 @@ class InGameNighttime extends Component{
         else{
             const livingPlayersRows = Array.from(this.props.livingVillagers).map(
                 (player) => {
-                    <tr key={player}>
-                        <td>{player}</td>
-                    </tr>
+                    return(
+                        <tr key={player}>
+                            <td>{player}</td>
+                        </tr>
+                    )
                 }
             )
             const deadPlayersRows = Array.from(this.props.deadVillagers).map(
                 (player) => {
-                    <tr key={player}>
-                        <td>{player}</td>
-                    </tr>
+                    return(
+                        <tr key={player}>
+                            <td>{player}</td>
+                        </tr>
+                    )
                 }
             )
             let statusDescText = null
