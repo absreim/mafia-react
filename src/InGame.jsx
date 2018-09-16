@@ -115,12 +115,12 @@ class InGame extends Component{
                             }
                             return <InGameStarted username={this.props.username} playerIsWerewolf={true} 
                                         werewolves={werewolvesSet} villagers={villagersSet} 
-                                        acks={this.props.gameState.acks} sendAck={this.sendAck} />
+                                        acks={new Set(this.props.gameState.acks)} sendAck={this.sendAck} />
                         }
                         else{
                             return <InGameStarted username={this.props.username} playerIsWerewolf={false} 
                                         werewolves={null} villagers={new Set(Object.keys(this.props.gameState.players))} 
-                                        acks={this.props.gameState.acks} sendAck={this.sendAck} />
+                                        acks={new Set(this.props.gameState.acks)} sendAck={this.sendAck} />
                         }
                     case Shared.Phases.DAYTIME:
                         if(this.props.gameState.players[this.props.username].isWerewolf){
@@ -160,7 +160,7 @@ class InGame extends Component{
                             const playerIsWerewolf = this.props.gameState.players[this.props.username].isWerewolf
                             return <InGameDaytimeSummary username={this.props.username} chosenPlayer={this.props.gameState.chosenPlayer}
                                         voteSuccessful={true} playerIsWerewolf={playerIsWerewolf} livingPlayersObj={livingPlayersObj} 
-                                        deadPlayers={deadPlayersObj} sendAck={this.sendAck} />
+                                        deadPlayers={deadPlayersObj} acks={new Set(this.props.gameState.acks)} sendAck={this.sendAck} />
                         }
                     case Shared.Phases.DAYTIMEVOTEFAILED:
                         {
@@ -168,7 +168,7 @@ class InGame extends Component{
                             const playerIsWerewolf = this.props.gameState.players[this.props.username].isWerewolf
                             return <InGameDaytimeSummary username={this.props.username} chosenPlayer={this.props.gameState.chosenPlayer}
                                         voteSuccessful={false} playerIsWerewolf={playerIsWerewolf} livingPlayersObj={livingPlayersObj} 
-                                        deadPlayers={deadPlayersObj} sendAck={this.sendAck} />
+                                        deadPlayers={deadPlayersObj} acks={new Set(this.props.gameState.acks)} sendAck={this.sendAck} />
                         }
                     case Shared.Phases.NIGHTTIME:
                         if(this.props.gameState.players[this.props.username].isWerewolf){
@@ -209,7 +209,8 @@ class InGame extends Component{
                             const playerIsWerewolf = this.props.gameState.players[this.props.username].isWerewolf
                             return <InGameNighttimeSummary username={this.props.username} chosenPlayer={this.props.gameState.chosenPlayer}
                                         voteSuccessful={true} playerIsWerewolf={playerIsWerewolf} livingVillagers={livingVillagersSet} 
-                                        deadWerewolves={deadWerewolvesSet} deadVillagers={deadVillagersSet} sendAck={this.sendAck} />
+                                        deadWerewolves={deadWerewolvesSet} deadVillagers={deadVillagersSet}
+                                        acks={new Set(this.props.gameState.acks)} sendAck={this.sendAck} />
                         }
                     case Shared.Phases.NIGHTTIMEVOTEFAILED:
                         {
@@ -218,14 +219,15 @@ class InGame extends Component{
                             const playerIsWerewolf = this.props.gameState.players[this.props.username].isWerewolf
                             return <InGameNighttimeSummary username={this.props.username} chosenPlayer={this.props.gameState.chosenPlayer}
                                         voteSuccessful={false} playerIsWerewolf={playerIsWerewolf} livingVillagers={livingVillagersSet} 
-                                        deadWerewolves={deadWerewolvesSet} deadVillagers={deadVillagersSet} sendAck={this.sendAck} />
+                                        deadWerewolves={deadWerewolvesSet} deadVillagers={deadVillagersSet}
+                                        acks={new Set(this.props.gameState.acks)} sendAck={this.sendAck} />
                         }
                     case Shared.Phases.OVER:
                         const {livingWerewolvesSet, livingVillagersSet, 
                             deadWerewolvesSet, deadVillagersSet} = this.getWerewolvesVillagersByLiving()
                         return <InGameOver username={this.props.username} livingWerewolves={livingWerewolvesSet} 
                                     livingVillagers={livingVillagersSet} deadWerewolves={deadWerewolvesSet} 
-                                    deadVillagers={deadVillagersSet} acks={this.props.gameState.acks} 
+                                    deadVillagers={deadVillagersSet} acks={new Set(this.props.gameState.acks)} 
                                     sendAck={this.sendAck}/>
                     default:
                         return <h2>Error: unrecognized game state data received from server.</h2>

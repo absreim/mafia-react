@@ -20,6 +20,7 @@ class CreateGame extends Component{
         this.handleNumPlayersChange = this.handleNumPlayersChange.bind(this)
         this.handleNumWerewolvesChange = this.handleNumWerewolvesChange.bind(this)
         this.handleLobby = this.handleLobby.bind(this)
+        this.handleSubmit = this.handleSubmit.bind(this)
         this.getWerewolfHelpText = this.getWerewolfHelpText.bind(this)
     }
     handleNameChange(event){
@@ -44,7 +45,7 @@ class CreateGame extends Component{
             if(recommended > maxWerewolves){
                 recommended = maxWerewolves
             }
-            return ` (maximum: {maxWerewolves} recommended: {recommended})`
+            return ` (maximum: ${maxWerewolves} recommended: ${recommended})`
         }
         else{
             return ""
