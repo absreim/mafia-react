@@ -103,38 +103,77 @@ class GameContent extends Component{
             console.log("Error encountered by the socket.io client: " + error)
         }).bind(this))
         socket.on(Shared.ServerSocketEvent.STATUSREPLY, (function(data){
-            if(data.game && data.isLobbyGame){
-                if(this.state.phase === GameContentPhase.AWAITINGINITIALSTATUS){
-                    this.setState({
-                        gameName: data.game,
-                        isLobbyGame: data.isLobbyGame,
-                        phase: GameContentPhase.PREVIOUSSTATUSPAGE
-                    })
-                }
-                else{
-                    this.setState({
-                        gameName: data.game,
-                        isLobbyGame: data.isLobbyGame
-                    })
-                    this.requestStateDetails()
-                }
-            }
-            else{
-                if(this.state.phase === GameContentPhase.AWAITINGINITIALSTATUS){
-                    this.setState({
-                        gameName: null,
-                        phase: GameContentPhase.PREVIOUSSTATUSPAGE
-                    })
-                }
-                else{
-                    this.setState({
-                        gameName: null
-                    })
-                    this.requestStateDetails()
-                }
+            switch(data.type){
+                case Shared.StatusType.INGAME:
+                    if(this.state.phase === GameContentPhase.AWAITINGINITIALSTATUS){
+                        this.setState({
+                            isLobbyGame: false,
+                            gameName: data.gameName,
+                            gameState: null,
+                            phase: GameContentPhase.PREVIOUSSTATUSPAGE
+                        })
+                    }
+                    else{
+                        this.setState({
+                            phase: INGAME,
+                            isLobbyGame: false,
+                            gameName: data.gameName,
+                            gameState: data.gameState
+                        })
+                    }
+                case Shared.StatusType.INLOBBYGAME:
+                    if(this.state.phase === GameContentPhase.AWAITINGINITIALSTATUS){
+                        this.setState({
+                            isLobbyGame: true,
+                            gameName: data.gameName,
+                            lobbyGameState: null,
+                            phase: GameContentPhase.PREVIOUSSTATUSPAGE
+                        })
+                    }
+                    else{
+                        this.setState({
+                            isLobbyGame: true,
+                            gameName: data.gameName,
+                            lobbyGameState: data.gameState,
+                            phase: GameContentPhase.INLOBBYGAME
+                        })
+                    }
+                case Shared.StatusType.INLOBBY:
+                    if(this.state.phase === GameContentPhase.AWAITINGINITIALSTATUS){
+                        this.setState({
+                            lobbyState: null,
+                            lobbyGameState: null,
+                            gameName: null,
+                            gameState: null,
+                            phase: GameContentPhase.PREVIOUSSTATUSPAGE
+                        })
+                    }
+                    else{
+                        if(this.state.lobbyUpdatesSubscribed){
+                            this.setState({
+                                phase: INLOBBY,
+                                lobbyState: data.lobbyState,
+                                lobbyGameState: null,
+                                gameName: null,
+                                gameState: null
+                            })
+                        }
+                        else{
+                            this.setState({
+                                phase: INLOBBY,
+                                lobbyState: null,
+                                lobbyGameState: null,
+                                gameName: null,
+                                gameState: null
+                            })
+                            this.state.socket.emit(Shared.ClientSocketEvent.SUBSCRIBELOBBYUPDATES)
+                        }
+                    }
+                default:
+                    this.setState({message: "Unrecognized type in status message received."})
             }
         }).bind(this))
-        socket.on(Shared.ServerSocketEvent.LOBBYSTATE, (function(data){
+        socket.on(Shared.ServerSocketEvent.LOBBYSTATEREPLY, (function(data){
             if(data){
                 this.setState({lobbyState: data})
             }
@@ -161,7 +200,7 @@ class GameContent extends Component{
                 console.log("Info: possible race condition encountered. LOBBYUPDATESUNSUBSCRIBED message received from server at unexpected time.")
             }
         }).bind(this))
-        socket.on(Shared.ServerSocketEvent.LOBBYUPDATE, (function(data){
+        socket.on(Shared.ServerSocketEvent.LOBBYUPDATEREPLY, (function(data){
             if(this.state.lobbyUpdatesSubscribed && this.state.lobbyState){
                 if(data.type === Shared.LobbyUpdate.GAMECREATED){
                     if(data.game && data.numPlayers && data.numWerewolves && data.player){
@@ -239,9 +278,14 @@ class GameContent extends Component{
         socket.on(Shared.ServerSocketEvent.CREATEGAMEOUTCOME, (function(data){
             // no effort made to preserve order when it comes to requests and outcomes, since
             // the client is forced to accept whatever ultimate outcome is given the client last
-            switch(data){
+            switch(data.type){
                 case Shared.CreateGameOutcome.SUCCESS:
-                    // no need to request anything since server is expected to send the game state
+                    this.setState({
+                        phase: GameContentPhase.INLOBBYGAME,
+                        isLobbyGame: true,
+                        lobbyGameState: data.gameState,
+                        gameName: data.gameName
+                    })
                     break
                 case Shared.CreateGameOutcome.ALREADYINGAME:
                     this.setState({message: "Server reports that you are already in a game and must leave it before creating a new one. Please report this issue and try again later."})
@@ -269,9 +313,14 @@ class GameContent extends Component{
             }
         }).bind(this))
         socket.on(Shared.ServerSocketEvent.JOINGAMEOUTCOME, (function(data){
-            switch(data){
+            switch(data.type){
                 case Shared.JoinGameOutcome.SUCCESS:
-                    // no need to request anything since server is expected to send the game state
+                    this.setState({
+                        phase: GameContentPhase.INLOBBYGAME,
+                        isLobbyGame: true,
+                        lobbyGameState: data.gameState,
+                        gameName: data.gameName
+                    })
                     break
                 case Shared.JoinGameOutcome.ALREADYINGAME:
                     this.setState({message: "Server reports that you are already in a game and must leave it before joining a new one. Please report this issue and try again later."})
@@ -310,78 +359,94 @@ class GameContent extends Component{
                     this.setState({message: "Unrecognized message received from server in response to request to leave game. Please report this issue and try again later."})
             }
         }).bind(this))
-        socket.on(Shared.ServerSocketEvent.LOBBYGAMESTATE, (function(data){
+        socket.on(Shared.ServerSocketEvent.LOBBYGAMESTATEREPLY, (function(data){
             if(data){
-                this.setState({lobbyGameState: data})
+                if(data.type){
+                    if(data.type === Shared.LobbyGameStateRequestOutcome.SUCCESS){
+                        this.setState({
+                            phase: GameContentPhase.INLOBBYGAME,
+                            gameName: data.gameName,
+                            lobbyGameState: data.gameState
+                        })
+                    }
+                    else if(data.type === Shared.LobbyGameStateRequestOutcome.NOTINLOBBYGAME){
+                        this.setState({message: "Lobby game state update message received, " + 
+                            "but server indicates that you are not in a lobby game."})
+                    }
+                    else{
+                        this.setState({message: "Lobby game state update message received with unrecognized type code."})
+                    }
+                }
+                else{
+                    this.setState({message: "Malformed lobby game state update message received."})
+                }
             }
             else{
                 this.setState({message: "Lobby game state update message received, but no data was present."})
             }
         }).bind(this))
         socket.on(Shared.ServerSocketEvent.GAMESTARTED, (function(){
-            if(this.state.phase === GameContentPhase.INLOBBY){
+            if(this.state.phase !== GameContentPhase.AWAITINGINITIALSTATUS && this.state.phase !== GameContentPhase.PREVIOUSSTATUSPAGE){
                 this.state.socket.emit(Shared.ClientSocketEvent.GAMEACTION, Shared.ClientMessageType.GAMESTATEREQ)
-            }
-            else{
-                console.log("Warning: received game started message when client is not known to be in a lobby game.")
-                this.requestStateDetails()
             }
         }).bind(this))
         socket.on(Shared.ServerSocketEvent.GAMEACTION, (function(data){
-            if(data && data.type){
-                switch(data.type){
-                    case Shared.ServerMessageType.VOTECAST:
-                        if(this.state.gameState){
-                            if(data.playerName && data.choice !== undefined){
-                                let newGameState = this.cloneGameState(this.state.gameState)
-                                newGameState.votes[data.playerName] = data.choice
-                                this.setState({
-                                    phase: GameContentPhase.INGAME,
-                                    gameState: newGameState
-                                })
+            if(this.state.phase !== GameContentPhase.AWAITINGINITIALSTATUS && this.state.phase !== GameContentPhase.PREVIOUSSTATUSPAGE){
+                if(data && data.type){
+                    switch(data.type){
+                        case Shared.ServerMessageType.VOTECAST:
+                            if(this.state.gameState){
+                                if(data.playerName && data.choice !== undefined){
+                                    let newGameState = this.cloneGameState(this.state.gameState)
+                                    newGameState.votes[data.playerName] = data.choice
+                                    this.setState({
+                                        phase: GameContentPhase.INGAME,
+                                        gameState: newGameState
+                                    })
+                                }
+                                else{
+                                    console.log("Warning: received VOTECAST message missing details of the vote.")
+                                }
                             }
                             else{
-                                console.log("Warning: received VOTECAST message missing details of the vote.")
+                                console.log("Warning: received VOTECAST message when game state is not known. Requesting game state update.")
+                                this.state.socket.emit(Shared.ClientSocketEvent.GAMEACTION, Shared.ClientMessageType.GAMESTATEREQ)
                             }
-                        }
-                        else{
-                            console.log("Warning: received VOTECAST message when game state is not known. Requesting game state update.")
-                            this.state.socket.emit(Shared.ClientSocketEvent.GAMEACTION, Shared.ClientMessageType.GAMESTATEREQ)
-                        }
-                        break
-                    case Shared.ServerMessageType.ACKNOWLEDGEMENT:
-                        if(this.state.gameState){
-                            if(data.playerName){
-                                let newGameState = this.cloneGameState(this.state.gameState)
-                                newGameState.votes.acks.add(data.playerName)
-                                this.setState({
-                                    phase: GameContentPhase.INGAME,
-                                    gameState: newGameState
-                                })
+                            break
+                        case Shared.ServerMessageType.ACKNOWLEDGEMENT:
+                            if(this.state.gameState){
+                                if(data.playerName){
+                                    let newGameState = this.cloneGameState(this.state.gameState)
+                                    newGameState.votes.acks.add(data.playerName)
+                                    this.setState({
+                                        phase: GameContentPhase.INGAME,
+                                        gameState: newGameState
+                                    })
+                                }
+                                else{
+                                    console.log("Warning: received ACKNOWLEDGEMENT message missing the acknowledging player.")
+                                }
                             }
                             else{
-                                console.log("Warning: received ACKNOWLEDGEMENT message missing the acknowledging player.")
+                                console.log("Warning: received VOTECAST message when game state is not known. Requesting game state update.")
+                                this.state.socket.emit(Shared.ClientSocketEvent.GAMEACTION, Shared.ClientMessageType.GAMESTATEREQ)
                             }
-                        }
-                        else{
-                            console.log("Warning: received VOTECAST message when game state is not known. Requesting game state update.")
-                            this.state.socket.emit(Shared.ClientSocketEvent.GAMEACTION, Shared.ClientMessageType.GAMESTATEREQ)
-                        }
-                        break
-                    case Shared.ServerMessageType.GAMESTATEINFO:
-                        if(data.info){
-                            this.setState({
-                                phase: GameContentPhase.INGAME,
-                                gameState: data.info
-                            })
-                        }
-                        break
-                    default:
-                        console.log("Warning: GAMEACTION message received with unrecognized type.")
+                            break
+                        case Shared.ServerMessageType.GAMESTATEINFO:
+                            if(data.info){
+                                this.setState({
+                                    phase: GameContentPhase.INGAME,
+                                    gameState: data.info
+                                })
+                            }
+                            break
+                        default:
+                            console.log("Warning: GAMEACTION message received with unrecognized type.")
+                    }
                 }
-            }
-            else{
-                console.log("Warning: received malformed GAMEACTION message.")
+                else{
+                    console.log("Warning: received malformed GAMEACTION message.")
+                }
             }
         }).bind(this))
         socket.on(Shared.ServerSocketEvent.GAMEENDED, (function(data){
@@ -395,21 +460,14 @@ class GameContent extends Component{
         }
     }
     attemptEnterLobby(){
+        this.setState({
+            phase: GameContentPhase.INLOBBY,
+            lobbyState: null
+        })
         this.state.socket.emit(Shared.ClientSocketEvent.SUBSCRIBELOBBYUPDATES)
-        this.setState({phase: GameContentPhase.INLOBBY})
     }
     requestStateDetails(){
-        if(this.state.gameName){ // user in game already, request copy of game state
-            if(this.state.isLobbyGame){
-                this.state.socket.emit(Shared.ClientSocketEvent.LOBBYGAMESTATEREQUEST)
-            }
-            else{
-                this.state.socket.emit(Shared.ClientSocketEvent.GAMEACTION, Shared.ClientMessageType.GAMESTATEREQ)
-            }
-        }
-        else{ // no previous game, send user to lobby
-            this.attemptEnterLobby()
-        }
+        this.state.socket.emit(Shared.ClientSocketEvent.STATUSREQUEST)
     }
     connectSocket(){
         this.state.socket.open()
