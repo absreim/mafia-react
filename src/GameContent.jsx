@@ -63,7 +63,7 @@ class GameContent extends Component{
                 gameName: null,
                 phase: GameContentPhase.AWAITINGINITIALSTATUS
             })
-            socket.emit(Shared.ClientSocketEvent.STATUSREQUEST)
+            socket.emit(Shared.ClientSocketEvent.INITIALSTATUSREQUEST)
         }).bind(this))
         socket.on("disconnect", (function(){
             this.setState({
@@ -102,73 +102,76 @@ class GameContent extends Component{
             })
             console.log("Error encountered by the socket.io client: " + error)
         }).bind(this))
+        socket.on(Shared.ServerSocketEvent.INITIALSTATUSREPLY, (function(data){
+            switch(data.type){
+                case Shared.StatusType.INGAME:
+                    this.setState({
+                        isLobbyGame: false,
+                        gameName: data.gameName,
+                        gameState: null,
+                        phase: GameContentPhase.PREVIOUSSTATUSPAGE
+                    })
+                    break
+                case Shared.StatusType.INLOBBYGAME:
+                    this.setState({
+                        isLobbyGame: true,
+                        gameName: data.gameName,
+                        lobbyGameState: null,
+                        phase: GameContentPhase.PREVIOUSSTATUSPAGE
+                    })
+                    break
+                case Shared.StatusType.INLOBBY:
+                    this.setState({
+                        lobbyState: null,
+                        lobbyGameState: null,
+                        gameName: null,
+                        gameState: null,
+                        phase: GameContentPhase.PREVIOUSSTATUSPAGE
+                    })
+                    break
+                default:
+                    this.setState({message: "Unrecognized type in status message received."})
+            }
+        }).bind(this))
         socket.on(Shared.ServerSocketEvent.STATUSREPLY, (function(data){
             switch(data.type){
                 case Shared.StatusType.INGAME:
-                    if(this.state.phase === GameContentPhase.AWAITINGINITIALSTATUS){
-                        this.setState({
-                            isLobbyGame: false,
-                            gameName: data.gameName,
-                            gameState: null,
-                            phase: GameContentPhase.PREVIOUSSTATUSPAGE
-                        })
-                    }
-                    else{
-                        this.setState({
-                            phase: INGAME,
-                            isLobbyGame: false,
-                            gameName: data.gameName,
-                            gameState: data.gameState
-                        })
-                    }
+                    this.setState({
+                        phase: GameContentPhase.INGAME,
+                        isLobbyGame: false,
+                        gameName: data.gameName,
+                        gameState: data.gameState
+                    })
+                    break
                 case Shared.StatusType.INLOBBYGAME:
-                    if(this.state.phase === GameContentPhase.AWAITINGINITIALSTATUS){
+                    this.setState({
+                        isLobbyGame: true,
+                        gameName: data.gameName,
+                        lobbyGameState: data.gameState,
+                        phase: GameContentPhase.INLOBBYGAME
+                    })
+                    break
+                case Shared.StatusType.INLOBBY:
+                    if(this.state.lobbyUpdatesSubscribed){
                         this.setState({
-                            isLobbyGame: true,
-                            gameName: data.gameName,
+                            phase: GameContentPhase.INLOBBY,
+                            lobbyState: data.lobbyState,
                             lobbyGameState: null,
-                            phase: GameContentPhase.PREVIOUSSTATUSPAGE
+                            gameName: null,
+                            gameState: null
                         })
                     }
                     else{
                         this.setState({
-                            isLobbyGame: true,
-                            gameName: data.gameName,
-                            lobbyGameState: data.gameState,
-                            phase: GameContentPhase.INLOBBYGAME
-                        })
-                    }
-                case Shared.StatusType.INLOBBY:
-                    if(this.state.phase === GameContentPhase.AWAITINGINITIALSTATUS){
-                        this.setState({
+                            phase: GameContentPhase.INLOBBY,
                             lobbyState: null,
                             lobbyGameState: null,
                             gameName: null,
-                            gameState: null,
-                            phase: GameContentPhase.PREVIOUSSTATUSPAGE
+                            gameState: null
                         })
+                        this.state.socket.emit(Shared.ClientSocketEvent.SUBSCRIBELOBBYUPDATES)
                     }
-                    else{
-                        if(this.state.lobbyUpdatesSubscribed){
-                            this.setState({
-                                phase: INLOBBY,
-                                lobbyState: data.lobbyState,
-                                lobbyGameState: null,
-                                gameName: null,
-                                gameState: null
-                            })
-                        }
-                        else{
-                            this.setState({
-                                phase: INLOBBY,
-                                lobbyState: null,
-                                lobbyGameState: null,
-                                gameName: null,
-                                gameState: null
-                            })
-                            this.state.socket.emit(Shared.ClientSocketEvent.SUBSCRIBELOBBYUPDATES)
-                        }
-                    }
+                    break
                 default:
                     this.setState({message: "Unrecognized type in status message received."})
             }
@@ -286,6 +289,7 @@ class GameContent extends Component{
                         lobbyGameState: data.gameState,
                         gameName: data.gameName
                     })
+                    this.state.socket.emit(Shared.ClientSocketEvent.UNSUBSCRIBELOBBYUPDATES)
                     break
                 case Shared.CreateGameOutcome.ALREADYINGAME:
                     this.setState({message: "Server reports that you are already in a game and must leave it before creating a new one. Please report this issue and try again later."})
@@ -460,11 +464,7 @@ class GameContent extends Component{
         }
     }
     attemptEnterLobby(){
-        this.setState({
-            phase: GameContentPhase.INLOBBY,
-            lobbyState: null
-        })
-        this.state.socket.emit(Shared.ClientSocketEvent.SUBSCRIBELOBBYUPDATES)
+        this.requestStateDetails()
     }
     requestStateDetails(){
         this.state.socket.emit(Shared.ClientSocketEvent.STATUSREQUEST)

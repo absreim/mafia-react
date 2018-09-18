@@ -20,7 +20,7 @@ class LobbyGameWaiting extends Component {
     render(){
         let playerRows = null
         if(this.props.gameState.players){
-            Array.from(this.props.gameState.players).map((player) => 
+            this.props.gameState.players.map((player) => 
                 <tr key={player}>
                     <td>{player}</td>
                 </tr>
@@ -32,7 +32,7 @@ class LobbyGameWaiting extends Component {
                 <p>Waiting for players. Game will start automatically when needed number of players is reached.</p>
                 <p>Needed number of players: {this.props.gameState.maxPlayers}</p>
                 <p>Number of werewolves: {this.props.gameState.numWerewolves}</p>
-                <p>Number of players currently joined {this.props.gameState.players.size}</p>
+                <p>Number of players currently joined {this.props.gameState.players.length}</p>
                 <table>
                     <caption>List of players in the joined game.</caption>
                     <thead>
