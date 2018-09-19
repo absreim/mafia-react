@@ -203,7 +203,7 @@ class GameContent extends Component{
                 console.log("Info: possible race condition encountered. LOBBYUPDATESUNSUBSCRIBED message received from server at unexpected time.")
             }
         }).bind(this))
-        socket.on(Shared.ServerSocketEvent.LOBBYUPDATEREPLY, (function(data){
+        socket.on(Shared.ServerSocketEvent.LOBBYUPDATE, (function(data){
             if(this.state.lobbyUpdatesSubscribed && this.state.lobbyState){
                 if(data.type === Shared.LobbyUpdate.GAMECREATED){
                     if(data.game && data.numPlayers && data.numWerewolves && data.player){
@@ -212,7 +212,7 @@ class GameContent extends Component{
                             newLobbyState[gameName] = this.cloneLobbyGameState(this.state.lobbyState[gameName])
                         }
                         newLobbyState[data.game] = Shared.LobbyGameState(data.numPlayers, data.numWerewolves)
-                        newLobbyState[data.game].players.add(data.player)
+                        newLobbyState[data.game].players = [data.player]
                         this.setState({lobbyState: newLobbyState})
                     }
                     else{
@@ -222,7 +222,7 @@ class GameContent extends Component{
                 else if(data.type === Shared.LobbyUpdate.GAMEDELETED || data.type === Shared.LobbyUpdate.GAMESTARTED){
                     if(data.game){
                         const newLobbyState = {}
-                        for(let gameName in Object.keys(this.state.lobbyState)){
+                        for(let gameName of Object.keys(this.state.lobbyState)){
                             if(gameName !== data.game){
                                 newLobbyState[gameName] = this.cloneLobbyGameState(this.state.lobbyState[gameName])
                             }
@@ -236,13 +236,11 @@ class GameContent extends Component{
                 else if(data.type === Shared.LobbyUpdate.PLAYERJOINED){
                     if(data.game && data.player){
                         const newLobbyState = {}
-                        for(let gameName in Object.keys(this.state.lobbyState)){
-                            if(gameName !== data.game){
-                                newLobbyState[gameName] = this.cloneLobbyGameState(this.state.lobbyState[gameName])
-                            }
+                        for(let gameName of Object.keys(this.state.lobbyState)){
+                            newLobbyState[gameName] = this.cloneLobbyGameState(this.state.lobbyState[gameName])
                         }
                         if(newLobbyState[data.game]){
-                            newLobbyState[data.game].players.add(data.player)
+                            newLobbyState[data.game].players.push(data.player)
                         }
                         else{
                             console.log("Warning: game specified in \"player joined\" lobby update does not exist.")
@@ -256,13 +254,12 @@ class GameContent extends Component{
                 else if(data.type === Shared.LobbyUpdate.PLAYERLEFT){
                     if(data.game && data.player){
                         const newLobbyState = {}
-                        for(let gameName in Object.keys(this.state.lobbyState)){
-                            if(gameName !== data.game){
-                                newLobbyState[gameName] = this.cloneLobbyGameState(this.state.lobbyState[gameName])
-                            }
+                        for(let gameName of Object.keys(this.state.lobbyState)){
+                            newLobbyState[gameName] = this.cloneLobbyGameState(this.state.lobbyState[gameName])
                         }
                         if(newLobbyState[data.game]){
-                            newLobbyState[data.game].players.delete(data.player)
+                            newLobbyState[data.game].players = newLobbyState[data.game].players.filter(
+                                (player) => (player !== data.player))
                         }
                         else{
                             console.log("Warning: game specified in \"player left\" lobby update does not exist.")
@@ -535,9 +532,7 @@ class GameContent extends Component{
                 for(let player of Object.keys(gameState.votes)){
                     newGameState.votes[player] = gameState.votes[player]
                 }
-                for(let player of gameState.acks){
-                    newGameState.acks.add(player)
-                }
+                newGameState.acks = gameState.acks.slice()
                 newGameState.chosenPlayer = gameState.chosenPlayer
                 newGameState.phase = gameState.phase
                 return newGameState
@@ -551,9 +546,7 @@ class GameContent extends Component{
         if(gameState){
             if(gameState.maxPlayers && gameState.numWerewolves && gameState.players){
                 const newGameState = new Shared.LobbyGameState(gameState.maxPlayers, gameState.numWerewolves)
-                for(let player of gameState.players){
-                    newGameState.players.add(player)
-                }
+                newGameState.players = gameState.players.slice()
                 return newGameState
             }
             else{

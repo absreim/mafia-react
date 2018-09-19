@@ -41,9 +41,9 @@ class Lobby extends Component{
                 return(
                     <tr key={gameName} onClick={() => this.handleClick(gameName)} className={gameName === this.state.selectedGame ? "games-table__row--selected" : "games-table__row"}>
                         <td>{gameName}</td>
-                        <td>{this.state.lobbyGames[gameName].players.size}</td>
-                        <td>{this.state.lobbyGames[gameName].maxPlayers}</td>
-                        <td>{this.state.lobbyGames[gameName].numWerewolves}</td>
+                        <td>{this.props.lobbyGames[gameName].players.length}</td>
+                        <td>{this.props.lobbyGames[gameName].maxPlayers}</td>
+                        <td>{this.props.lobbyGames[gameName].numWerewolves}</td>
                     </tr>
                 )}
         )}

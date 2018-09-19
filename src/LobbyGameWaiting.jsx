@@ -20,7 +20,7 @@ class LobbyGameWaiting extends Component {
     render(){
         let playerRows = null
         if(this.props.gameState.players){
-            this.props.gameState.players.map((player) => 
+            playerRows = this.props.gameState.players.map((player) => 
                 <tr key={player}>
                     <td>{player}</td>
                 </tr>
