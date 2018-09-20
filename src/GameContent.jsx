@@ -211,7 +211,7 @@ class GameContent extends Component{
                         for(let gameName in Object.keys(this.state.lobbyState)){
                             newLobbyState[gameName] = this.cloneLobbyGameState(this.state.lobbyState[gameName])
                         }
-                        newLobbyState[data.game] = Shared.LobbyGameState(data.numPlayers, data.numWerewolves)
+                        newLobbyState[data.game] = new Shared.LobbyGameState(data.numPlayers, data.numWerewolves)
                         newLobbyState[data.game].players = [data.player]
                         this.setState({lobbyState: newLobbyState})
                     }
@@ -290,6 +290,7 @@ class GameContent extends Component{
                     break
                 case Shared.CreateGameOutcome.ALREADYINGAME:
                     this.setState({message: "Server reports that you are already in a game and must leave it before creating a new one. Please report this issue and try again later."})
+                    this.requestStateDetails()
                     break
                 case Shared.CreateGameOutcome.TOOMANYWEREWOLVES:
                     this.setState({message: "Server reports that the game creation request specified too many werewolves. This outcome implies a inconsistency between the client and server. Please report this issue and try a smaller number of werewolves."})
@@ -325,9 +326,10 @@ class GameContent extends Component{
                     break
                 case Shared.JoinGameOutcome.ALREADYINGAME:
                     this.setState({message: "Server reports that you are already in a game and must leave it before joining a new one. Please report this issue and try again later."})
+                    this.requestStateDetails()
                     break
                 case Shared.JoinGameOutcome.DOESNOTEXIST:
-                    this.setState({message: "Server reports that the game you are trying to join does not exist. It may have started or have been deleted. Please choose a different game."})
+                    this.setState({message: "Server reports that the game you are trying to join does not exist. It may have been deleted. Please choose a different game."})
                     break
                 case Shared.JoinGameOutcome.GAMESTARTED:
                     this.setState({message: "Server reports that the game you are trying to join has already started. Please choose a different game."})
@@ -345,13 +347,15 @@ class GameContent extends Component{
         socket.on(Shared.ServerSocketEvent.LEAVEGAMEOUTCOME, (function(data){
             switch(data){
                 case Shared.LeaveGameOutcome.SUCCESS:
-                    this.attemptEnterLobby()
+                    this.requestStateDetails()
                     break
                 case Shared.LeaveGameOutcome.NOTINGAME:
                     this.setState({message: "Server reports that you tried to leave a game but was not in a game to begin with."})
+                    this.requestStateDetails()
                     break
                 case Shared.LeaveGameOutcome.GAMESTARTED:
                     this.setState({message: "Attempted to leave game, but the game started by the time the request was processed."})
+                    this.requestStateDetails()
                     break
                 case Shared.LeaveGameOutcome.INTERNALERROR:
                     this.setState({message: "Intenal server error trying to leave game. Please try again later."})
@@ -388,7 +392,7 @@ class GameContent extends Component{
         }).bind(this))
         socket.on(Shared.ServerSocketEvent.GAMESTARTED, (function(){
             if(this.state.phase !== GameContentPhase.AWAITINGINITIALSTATUS && this.state.phase !== GameContentPhase.PREVIOUSSTATUSPAGE){
-                this.state.socket.emit(Shared.ClientSocketEvent.GAMEACTION, Shared.ClientMessageType.GAMESTATEREQ)
+                this.state.socket.emit(Shared.ClientSocketEvent.GAMEACTION, {type: Shared.ClientMessageType.GAMESTATEREQ})
             }
         }).bind(this))
         socket.on(Shared.ServerSocketEvent.GAMEACTION, (function(data){
@@ -460,9 +464,6 @@ class GameContent extends Component{
             this.state.socket.close()
         }
     }
-    attemptEnterLobby(){
-        this.requestStateDetails()
-    }
     requestStateDetails(){
         this.state.socket.emit(Shared.ClientSocketEvent.STATUSREQUEST)
     }
@@ -491,7 +492,7 @@ class GameContent extends Component{
     navigateLobbyFromCreate(){
         this.setState({message: null})
         if(this.state.phase === GameContentPhase.CREATEGAME){
-            this.attemptEnterLobby()
+            this.requestStateDetails()
         }
         else{
             console.log("Warning: function to return to lobby from create game screen called when client was not in create game screen.")

@@ -23,7 +23,7 @@ class InGame extends Component{
     
     constructor(props){
         super(props)
-        this.handleAck = this.handleAck.bind(this)
+        this.sendAck = this.sendAck.bind(this)
         this.sendSuggestion = this.sendSuggestion.bind(this)
     }
     sendAck(){
@@ -99,7 +99,7 @@ class InGame extends Component{
     }
     render(){
         if(this.props.gameState){
-            if(this.props.username in Object.keys(this.props.gameState.players)){
+            if(this.props.username in this.props.gameState.players){
                 switch(this.props.gameState.phase){
                     case Shared.Phases.STARTED:
                         if(this.props.gameState.players[this.props.username].isWerewolf){

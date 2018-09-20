@@ -491,7 +491,7 @@ class App extends Component {
       case ContentEnum.Welcome:
         return <Welcome handleLogin={this.navigateLogin} handleCreate={this.navigateCreate} />
       case ContentEnum.GameContent:
-        return <GameContent handleMainMenu={this.navigateMainMenu} />
+        return <GameContent handleMainMenu={this.navigateMainMenu} username={this.state.username} />
       default:
         return <h2>An internal error has occurred. Please report this issue and try again later.</h2>
     }
