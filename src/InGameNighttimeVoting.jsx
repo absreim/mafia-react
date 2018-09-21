@@ -50,7 +50,7 @@ class InGameNighttimeVoting extends Component{
                         <button disabled={this.props.username in this.props.votes}
                             onClick={this.handleYeaVote}>Vote Yea</button>
                         <button disabled={this.props.username in this.props.votes}
-                            onClick={this.handleNayVote}>Vote Nea</button>
+                            onClick={this.handleNayVote}>Vote Nay</button>
                     </React.Fragment>
                 )
             }
@@ -86,7 +86,7 @@ class InGameNighttimeVoting extends Component{
             return (
                 <div>
                     <h2>It is time to vote on whether to kill the chosen villager.</h2>
-                    <p>The chosen villager is 
+                    <p>The chosen villager is&nbsp;
                         <span className=".chosen-player-desc__player-name">{this.props.chosenPlayer}</span>.</p>
                     <p>A simple majority is need to kill the chosen villager.</p>
                     <table>

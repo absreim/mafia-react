@@ -34,12 +34,12 @@ class InGameDaytimeSummary extends Component{
     render(){
         const outcomeDesc = this.props.voteSuccessful ? (
             <p>The vote has passed due to a simple majority.
-                Player <span className="chosen-player-desc__player-name">{this.props.chosenPlayer}</span> 
-                has been executed.</p>
+                Player <span className="chosen-player-desc__player-name">{this.props.chosenPlayer}</span> has 
+                been executed.</p>
         ) : (
             <p>The vote failed because Yea votes did not reach a majority. 
-                Player <span className="chosen-player-desc__player-name">{this.props.chosenPlayer}</span> 
-                has been spared. A new victim will be chosen and another round of daytime voting will begin.
+                Player <span className="chosen-player-desc__player-name">{this.props.chosenPlayer}</span> has 
+                been spared. A new victim will be chosen and another round of daytime voting will begin.
                 The daytime voting process will repeat until a vote is successful.</p>
         )
         let votesTable = null
@@ -163,7 +163,7 @@ class InGameDaytimeSummary extends Component{
                 {votesTable}
                 {deadTable}
                 <button onClick={this.handleAck} 
-                    disabled={this.props.username in this.props.acks}>Acknowledge</button>
+                    disabled={this.props.acks.has(this.props.username)}>Acknowledge</button>
             </div>
         )
     }

@@ -24,8 +24,8 @@ class InGameDaytime extends Component{
     handleClickPlayer(player){
         this.setState({selectedPlayer: player})
     }
-    handleSuggest(player){
-        this.props.sendSuggestion(player)
+    handleSuggest(){
+        this.props.sendSuggestion(this.state.selectedPlayer)
     }
     render(){
         if(this.props.playerIsWerewolf){
@@ -105,7 +105,7 @@ class InGameDaytime extends Component{
                         </table>
                         <p>Waiting for a player to suggest a target for execution.
                             You may suggest a target yourself by selecting a player and clicking "Suggest".</p>
-                        <button onClick={this.handleSuggest(this.state.selectedPlayer)} 
+                        <button onClick={this.handleSuggest} 
                             disabled={!this.state.selectedPlayer}>Suggest</button>
                     </div>
                 )
@@ -223,7 +223,7 @@ class InGameDaytime extends Component{
                         </table>
                         <p>Waiting for a player to suggest a target for execution.
                             You may suggest a target yourself by selecting a player and clicking "Suggest".</p>
-                        <button onClick={this.handleSuggest(this.state.selectedPlayer)} 
+                        <button onClick={this.handleSuggest} 
                             disabled={!this.state.selectedPlayer}>Suggest</button>
                     </div>
                 )

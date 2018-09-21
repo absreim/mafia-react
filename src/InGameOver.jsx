@@ -22,12 +22,21 @@ class InGameOver extends Component {
         this.props.sendAck()
     }
     render(){
+        const livingVillagersRows = Array.from(this.props.livingVillagers).map((player) => {
+            return (
+                <tr key={player}
+                    className="player-list__row">
+                    <td>{player}</td>
+                    <td>{this.props.acks.has(player) ? "Yes" : "No"}</td>
+                </tr>
+            )
+        })
         const deadVillagersRows = Array.from(this.props.deadVillagers).map((player) => {
             return (
                 <tr key={player}
                     className="player-list__row">
                     <td>{player}</td>
-                    <td>{player in this.props.acks ? "Yes" : "No"}</td>
+                    <td>{this.props.acks.has(player) ? "Yes" : "No"}</td>
                 </tr>
             )
         })
@@ -36,13 +45,13 @@ class InGameOver extends Component {
                 <tr key={player}
                     className="player-list__row">
                     <td>{player}</td>
-                    <td>{player in this.props.acks ? "Yes" : "No"}</td>
+                    <td>{this.props.acks.has(player) ? "Yes" : "No"}</td>
                 </tr>
             )
         })
         let outcomeDesc = null
         let livingVictorsTable = null
-        if(this.props.livingVillagers.size === 0){
+        if(this.props.livingVillagers.size <= this.props.livingWerewolves.size){
             outcomeDesc = (
                 <p>Werewolves win.</p>
             )
@@ -51,39 +60,45 @@ class InGameOver extends Component {
                     <tr key={player}
                         className="player-list__row">
                         <td>{player}</td>
-                        <td>{player in this.props.acks ? "Yes" : "No"}</td>
+                        <td>{this.props.acks.has(player) ? "Yes" : "No"}</td>
                     </tr>
                 )
             })
             livingVictorsTable = (
-                <table>
-                    <caption>List of living werewolves.</caption>
-                    <thead>
-                        <tr>
-                            <th colSpan="2">Living Werewolves</th>
-                        </tr>
-                        <tr>
-                            <th>Name</th>
-                            <th>Acknowledged</th>
-                        </tr>
-                    </thead>
-                    <tbody>{livingWerewolvesRows}</tbody>
-                </table>
+                <React.Fragment>
+                    <table>
+                        <caption>List of living werewolves.</caption>
+                        <thead>
+                            <tr>
+                                <th colSpan="2">Living Werewolves</th>
+                            </tr>
+                            <tr>
+                                <th>Name</th>
+                                <th>Acknowledged</th>
+                            </tr>
+                        </thead>
+                        <tbody>{livingWerewolvesRows}</tbody>
+                    </table>
+                    <table>
+                        <caption>List of living villagers.</caption>
+                        <thead>
+                            <tr>
+                                <th colSpan="2">Living Villagers</th>
+                            </tr>
+                            <tr>
+                                <th>Name</th>
+                                <th>Acknowledged</th>
+                            </tr>
+                        </thead>
+                        <tbody>{livingVillagersRows}</tbody>
+                    </table>
+                </React.Fragment>
             )
         }
         else{
             outcomeDesc = (
                 <p>Villagers win.</p>
             )
-            const livingVillagersRows = Array.from(this.props.livingVillagers).map((player) => {
-                return (
-                    <tr key={player}
-                        className="player-list__row">
-                        <td>{player}</td>
-                        <td>{player in this.props.acks ? "Yes" : "No"}</td>
-                    </tr>
-                )
-            })
             livingVictorsTable = (
                 <table>
                     <caption>List of living villagers.</caption>
@@ -133,7 +148,7 @@ class InGameOver extends Component {
                     <tbody>{deadWerewolvesRows}</tbody>
                 </table>
                 <button onClick={this.handleAck}
-                        disabled={this.props.username in this.props.acks}>Acknowledge</button>
+                        disabled={this.props.acks.has(this.props.username)}>Acknowledge</button>
             </div>
         )
     }

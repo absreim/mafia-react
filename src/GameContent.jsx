@@ -422,7 +422,7 @@ class GameContent extends Component{
                             if(this.state.gameState){
                                 if(data.playerName){
                                     let newGameState = this.cloneGameState(this.state.gameState)
-                                    newGameState.votes.acks.add(data.playerName)
+                                    newGameState.acks.push(data.playerName)
                                     this.setState({
                                         phase: GameContentPhase.INGAME,
                                         gameState: newGameState
@@ -635,7 +635,7 @@ class GameContent extends Component{
                     </div>
                 break
             case GameContentPhase.INGAME:
-                content = <InGame gameState={this.state.gameState} sendGameMessage={this.sendGameMessage} username={this.props.username} />
+                content = <InGame gameState={this.state.gameState} sendMessage={this.sendGameMessage} username={this.props.username} />
                 break
             default:
                 content =

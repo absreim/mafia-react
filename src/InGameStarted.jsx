@@ -24,7 +24,7 @@ class InGameStarted extends Component{
             return (
                 <tr key={villager}>
                     <td>{villager}</td>
-                    <td>{villager in this.props.acks ? "Yes" : "No"}</td>
+                    <td>{this.props.acks.has(villager) ? "Yes" : "No"}</td>
                 </tr>
             )
         })
@@ -33,7 +33,7 @@ class InGameStarted extends Component{
                 return (
                     <tr key={werewolf}>
                         <td>{werewolf}</td>
-                        <td>{werewolf in this.props.acks ? "Yes" : "No"}</td>
+                        <td>{this.props.acks.has(werewolf) ? "Yes" : "No"}</td>
                     </tr>
                 )
             })
@@ -70,7 +70,7 @@ class InGameStarted extends Component{
                         <tbody>{villagerRows}</tbody>
                     </table>
                     <button onClick={this.handleReady}
-                        disabled={this.props.username in this.props.acks}>Ready</button>
+                        disabled={this.props.acks.has(this.props.username)}>Ready</button>
                 </div>
             )
         }
@@ -94,7 +94,7 @@ class InGameStarted extends Component{
                         <tbody>{villagerRows}</tbody>
                     </table>
                     <button onClick={this.handleReady} 
-                        disabled={this.props.username in this.props.acks}>Ready</button>
+                        disabled={this.props.acks.has(this.props.username)}>Ready</button>
                 </div>
             )
         }

@@ -57,7 +57,7 @@ class InGameDaytimeVoting extends Component{
                 <button disabled={this.props.username in this.props.votes}
                     onClick={this.handleYeaVote}>Vote Yea</button>
                 <button disabled={this.props.username in this.props.votes}
-                    onClick={this.handleNayVote}>Vote Nea</button>
+                    onClick={this.handleNayVote}>Vote Nay</button>
             </React.Fragment>
         const deadInteractionArea = <p>Waiting for players to vote. Since you are dead, you cannot vote.</p>
         if(this.props.playerIsWerewolf){
@@ -91,7 +91,7 @@ class InGameDaytimeVoting extends Component{
             return(
                 <div>
                     <h2>It is time to vote in the daytime to execute a suspected werewolf.</h2>
-                    <p>The chosen player is 
+                    <p>The chosen player is&nbsp;
                         <span className=".chosen-player-desc__player-name">{this.props.chosenPlayer}</span>.</p>
                     <p>You are a werewolf and you are {deathStatusString}.</p>
                     <p>A simple majority is needed to execute the accused. Cast your vote below.</p>
@@ -144,13 +144,13 @@ class InGameDaytimeVoting extends Component{
             )
         }
         else{
-            const playerIsAlive = this.props.username in this.props.livingVillagers
+            const playerIsAlive = this.props.livingVillagers.has(this.props.username)
             const deathStatusString = playerIsAlive ? "alive" : "dead"
             const interactionArea = playerIsAlive ? livingInteractionArea : deadInteractionArea
             return(
                 <div>
                     <h2>It is time to vote in the daytime to execute a suspected werewolf.</h2>
-                    <p>The chosen player is 
+                    <p>The chosen player is&nbsp;
                         <span className=".chosen-player-desc__player-name">{this.props.chosenPlayer}</span>.</p>
                     <p>You are a villager and you are {deathStatusString}.</p>
                     <p>A simple majority is needed to execute the accused. Cast your vote below.</p>

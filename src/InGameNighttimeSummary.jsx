@@ -43,14 +43,14 @@ class InGameNighttimeSummary extends Component{
                 </tr>
             )
         })
-        let outcomeDesc = <p>The player 
+        let outcomeDesc = <p>The player&nbsp;
             <span className="chosen-player-desc__player-name">{this.props.chosenPlayer}</span> was killed.</p>
         let tablesArea = null
         if(this.props.playerIsWerewolf){
             if(!this.props.voteSuccessful){
                 outcomeDesc = (
-                    <p>The vote failed and the chosen villager 
-                        <span className="chosen-player-desc__player-name">{this.props.chosenPlayer}</span> 
+                    <p>The vote failed and the chosen villager&nbsp;
+                        <span className="chosen-player-desc__player-name">{this.props.chosenPlayer}</span>&nbsp;
                         was not killed. Werewolves will choose a new villager to vote on.</p>
                 )
             }
@@ -158,7 +158,7 @@ class InGameNighttimeSummary extends Component{
                 {outcomeDesc}
                 {tablesArea}
                 <button onClick={this.handleAck} 
-                        disabled={this.props.username in this.props.acks}>Acknowledge</button>
+                        disabled={this.props.acks.has(this.props.username)}>Acknowledge</button>
             </div>
         )
     }

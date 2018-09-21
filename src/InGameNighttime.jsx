@@ -17,14 +17,15 @@ class InGameNighttime extends Component{
     constructor(props){
         super(props)
         this.state = {
-            selectPlayer: null
+            selectedPlayer: null
         }
+        this.handleSuggest = this.handleSuggest.bind(this)
     }
     handleClickPlayer(player){
         this.setState({selectedPlayer: player})
     }
-    handleSuggest(player){
-        this.props.sendSuggestion(player)
+    handleSuggest(){
+        this.props.sendSuggestion(this.state.selectedPlayer)
     }
     render(){
         if(this.props.playerIsWerewolf){
@@ -68,7 +69,7 @@ class InGameNighttime extends Component{
                     <React.Fragment>
                         <p>Waiting for a werewolf to suggest a target for killing.
                         You may suggest a target yourself by selecting a player and clicking "Suggest".</p>
-                        <button onClick={this.handleSuggest(this.state.selectedPlayer)} 
+                        <button onClick={this.handleSuggest} 
                         disabled={!this.state.selectedPlayer}>Suggest</button>
                     </React.Fragment>
                 )
